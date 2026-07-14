@@ -1,7 +1,7 @@
 # Rich Captions Specification
 
 ## 1. Introduction
-This specification outlines standard practices for Non-Speech Information (NSI) captioning and synchronizing complex audio events.
+TEST TEST
 
 ### 1.1 Notation
 Mathematical relationships for timing offsets can be defined as follows:
