@@ -1,0 +1,24 @@
+{
+  "name": "rich_caption_specs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rich-Captions-Working-Group/Rich_Caption_Specs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Rich-Captions-Working-Group/Rich_Caption_Specs/issues"
+  },
+  "homepage": "https://github.com/Rich-Captions-Working-Group/Rich_Caption_Specs#readme",
+  "dependencies": {
+    "spec-up": "^0.12.2"
+  }
+}

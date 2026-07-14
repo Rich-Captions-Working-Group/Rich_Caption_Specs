@@ -1,0 +1,15 @@
+{
+  "specs": [
+    {
+      "title": "Rich Captions Specification",
+      "spec_directory": "./",
+      "output_path": "./build",
+      "katex": true,
+      "source": {
+        "host": "github",
+        "account": "Rich-Captions-Working-Group",
+        "repo": "Rich_Caption_Specs"
+      }
+    }
+  ]
+}
