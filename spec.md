@@ -1,6 +1,6 @@
 # Rich Captions Specification
 
-Rich Captions uses an object-oriented approach
+Rich Captions uses an object-oriented approach...
 
 
 ## Block
@@ -163,7 +163,7 @@ Segments are the lowest configurable units within a `Speech` block. Timing is op
 
 ---
 
-### Example Representation (Code-Switching)
+### Example Representation
 
 This example demonstrates a primarily English sentence with a Spanish phrase embedded within it, utilizing segment-level language overrides.
 
