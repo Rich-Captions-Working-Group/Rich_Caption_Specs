@@ -36,6 +36,7 @@ The `metadata` object encapsulates tracking information. This data does not impa
 
 The following JSON illustrates a standard instance of a `Block` object:
 
+
 ```json
 {
   "type": "Block",
@@ -53,6 +54,8 @@ The following JSON illustrates a standard instance of a `Block` object:
     "updatedAt": "2026-07-16T11:15:30Z"
   }
 }
+```
+
 
 ## Speech
 
