@@ -221,6 +221,403 @@ This example demonstrates a primarily English sentence with a Spanish phrase emb
 
 ## Music
 
+*Inherits from:* [`Block`](#block)
+
+The `Music` class represents a time-bounded musical event. A Music block may describe an entire musical work, an excerpt from a work, incidental music, a recurring motif, or another temporally distinct musical event.
+
+Music descriptions may contain both structured information about the music itself and authored natural-language descriptions. Structured information allows rendering systems to adapt captions according to user preferences and available display space, while authored text provides a lightweight fallback and allows captioners to preserve descriptions that cannot easily be decomposed.
+
+### Block-Level Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `source` | `Object` | Spatial and diegetic information about where the music originates. Uses the same `Source` object as `Speech`. |
+| `importance` | `Integer` | A 1–5 scale indicating the subjective priority of captioning this musical event (1 = Niche/Extremely low, 5 = Crucial). |
+| `musicMetadata` | `Object` | Information identifying the musical work or recording, where known. |
+| `musicalAttributes` | `Object` | Structured musical characteristics such as tempo, key, and genre. |
+| `function` | `Array<String>` | One or more functions the music serves within the audiovisual material. |
+| `sonicDescription` | `Object` | Perceptual characteristics of how the music sounds in this event. |
+| `lyrics` | `Object` | Lyrics occurring during this musical event, where applicable. |
+| `displayText` | `String` | Optional authored natural-language description of the musical event. May be used directly by renderers or as a fallback when richer structure is unavailable (e.g., the sentence `"Energetic drums bang on while a deep, synth bass quakes"` might be provided as a fallback to a structured representation of the two instruments). |
+| `descriptionUnits` | `Array<DescriptionUnit>` | Structured descriptions of individual musically relevant objects or layers, such as instruments, rhythms, motifs, or voices. |
+| `segments` | `Array<MusicSegment>` | Optional timed subdivisions of the musical event. Segment-level values override corresponding block-level values. When a segment supplies a nested object, only the properties explicitly supplied by the segment override the corresponding block-level properties. Other properties continue to inherit from the parent block. For example, a block may define `"QUIET"` as its `loudness`, while a segment may override this with `"LOUD"`. The override applied only to that segment; other properties continue to inherit from the parent block.
+ |
+
+---
+
+### Music Metadata Object (`musicMetadata`)
+
+`musicMetadata` identifies the musical work or recording when this information is known. All fields are optional.
+
+Common metadata is represented through explicitly defined properties. Less common metadata may be included using `additionalMetadata`, allowing the format to remain extensible without requiring a predefined field for every possible music-industry metadata standard.
+
+| Property | Type | Description |
+|---|---|---|
+| `title` | `String` | Title of the musical work or recording. |
+| `artist` | `String` | Primary credited artist or performer. |
+| `year` | `Integer` | Year of release, where known. |
+| `album` | `String` | Album or collection containing the recording. |
+| `composer` | `Array<String>` | Composer or composers of the musical work. |
+| `lyricist` | `Array<String>` | Lyricist or lyricists. |
+| `copyrightOwner` | `Array<String>` | Copyright owner or owners, where relevant and known. |
+| `identifiers` | `Object` | Known external identifiers, expressed as key-value pairs using the identifier scheme as the key. |
+| `additionalMetadata` | `Object` | Additional metadata not represented by the predefined properties. |
+
+#### Example
+
+```json
+"musicMetadata": {
+  "title": "The Batman Theme",
+  "artist": "Danny Elfman",
+  "year": 1989,
+  "album": "Batman (Original Motion Picture Score)",
+  "composer": ["Danny Elfman"],
+  "lyricist": [],
+  "identifiers": {
+    "ISWC": "T-070.232.924-5",
+    "ISRC": "USWB10000074"
+  }
+}
+```
+
+---
+
+### Musical Attributes Object (`musicalAttributes`)
+
+`musicalAttributes` contains structured characteristics of the music itself. These describe the musical event as a whole rather than individual description units.
+
+| Property | Type | Description |
+|---|---|---|
+| `bpm` | `Float` | Approximate tempo in beats per minute. |
+| `key` | `String` | Musical key, where identifiable and relevant. |
+| `genre` | `Array<String>` | One or more genres or musical styles associated with the event (e.g., `["synth-pop", "dance"]`). |
+
+---
+
+### Function (`function`)
+
+`function` describes what the music appears to contribute to the audiovisual material. It is distinct from `importance`: a function describes the role of the music, whereas `importance` concerns the priority of captioning the event.
+
+Zero or more functions may be specified.
+
+Current values are:
+
+- `SET_MOOD_TONE`
+- `CONVEY_PRESENCE_ABSENCE_PLACE_TIME`
+- `CONNECT_TO_CULTURAL_TOPICS`
+
+Further functions may be added as the specification develops.
+
+#### Example
+
+```json
+"function": [
+  "SET_MOOD_TONE",
+  "CONVEY_PRESENCE_ABSENCE_PLACE_TIME"
+]
+```
+
+---
+
+### Sonic Description Object (`sonicDescription`)
+
+`sonicDescription` describes perceptual properties of the musical event. These properties concern how the music sounds within the scene rather than its musical identity.
+
+| Property | Type | Description |
+|---|---|---|
+| `description` | `String` | Free-form description of relevant sonic qualities, such as `"muffled"`, `"distorted"`, or `"tinny"`. |
+| `loudness` | `Enum` | Loudness relative to other sounds in the scene. Options: `"QUIET"`, `"MEDIUM"`, `"LOUD"`. |
+| `frequency` | `Object` | Optional description of the frequency characteristics of the event. |
+
+#### Frequency Object
+
+The representation of frequency characteristics remains provisional. This is intended to support viewers who may find it challenging to perceive some frequencies but not others (e.g., someone who may want musical events with predominantly high-frequency content to be captioned more consistently because of hearing loss at higher frequencies).
+
+| Property | Type | Description |
+|---|---|---|
+| `dominantRange` | `Enum` | Predominant frequency range. Options: `"LOW"`, `"MID"`, `"HIGH"`. |
+
+::: issue Issue Notice
+  I had a reference to an additional "ML profile" with low, medium, and high values. I don't have a note describing what this is, and, er, I forgot. —Caluã
+:::
+
+
+---
+
+### Lyrics Object (`lyrics`)
+
+`lyrics` contains sung or otherwise musically performed lexical content occurring within the Music block.
+
+| Property | Type | Description |
+|---|---|---|
+| `original` | `Object` | Lyrics in their original language, keyed by ISO language code. |
+| `translations` | `Object` | Optional translations, keyed by ISO language code. |
+| `isBurnedIn` | `Boolean` | `true` if the lyrics are already displayed as part of the source video. |
+
+#### Example
+
+```json
+"lyrics": {
+  "original": {
+    "en": "There's a starman waiting in the sky"
+  },
+  "translations": {
+    "pt-BR": "Sempre estar lá, e ver ele voltar"
+  },
+  "isBurnedIn": false
+}
+```
+
+---
+
+### Description Units (`descriptionUnits`)
+
+`descriptionUnits` provide structured descriptions of identifiable musical objects or layers.
+
+A unit is organised around an `anchor`: the primary musical element being described, such as an instrument, voice, rhythm, or the music as a whole. Descriptors are then associated with that anchor.
+
+This structure allows information about different musical elements to remain semantically associated. For example, in:
+
+> *energetic banjo plays with a slow, quiet bongo grooving warily*
+
+`energetic` and `plays` may be associated with the banjo, while `slow`, `quiet`, `grooving`, and `warily` may be associated with the bongo.
+
+For the moment, description units do **not** have independent importance values. Renderers may select or transform structured information according to user preferences and available space, but the specification does not require captioners to assign a relative priority to every musical object or descriptor.
+
+::: note Basic Note
+  `displayText` preserves an authored surface rendering. `descriptionUnits` encode semantic information and are not required to reproduce `displayText` verbatim; renderers may introduce, remove, or reorder grammatical material when constructing captions from structured data.
+:::
+
+::: note Basic Note
+  Descriptors associated with an anchor do not override corresponding block-level structured properties. For example, describing an instrument as `"quiet"` does not change the event-level `sonicDescription.loudness`.
+:::
+
+
+#### Description Unit Object
+
+| Property | Type | Description |
+|---|---|---|
+| `anchor` | `Object` | The primary musical element described by the unit. |
+| `descriptors` | `Array<Object>` | Structured descriptors associated with the anchor. |
+| `displayText` | `String` | Optional authored rendering of the complete unit. |
+
+#### Anchor Object
+
+| Property | Type | Description |
+|---|---|---|
+| `type` | `String` | Semantic category of the anchor, such as `"instrument"`, `"voice"`, `"rhythm"`, `"motif"`, or `"music"`. |
+| `value` | `String` | Human-readable identification of the anchor, such as `"banjo"`, `"bongo"`, or `"Woody's theme"`. |
+
+#### Descriptor Object
+
+| Property | Type | Description |
+|---|---|---|
+| `type` | `String` | Semantic role of the descriptor, such as `"quality"`, `"action"`, `"manner"`, or `"affectiveQuality"`. |
+| `value` | `String` | Descriptive value associated with the anchor. |
+
+The descriptor vocabulary is intentionally extensible. Renderers should not assume that the order of descriptors corresponds to their relative importance or necessarily to their surface order in a particular language.
+
+#### Example
+
+```json
+"descriptionUnits": [
+  {
+    "anchor": {
+      "type": "instrument",
+      "value": "banjo"
+    },
+    "descriptors": [
+      {
+        "type": "quality",
+        "value": "energetic"
+      },
+      {
+        "type": "action",
+        "value": "plays"
+      }
+    ],
+    "displayText": "energetic banjo plays"
+  },
+  {
+    "anchor": {
+      "type": "instrument",
+      "value": "bongo"
+    },
+    "descriptors": [
+      {
+        "type": "quality",
+        "value": "slow"
+      },
+      {
+        "type": "quality",
+        "value": "quiet"
+      },
+      {
+        "type": "action",
+        "value": "grooving"
+      },
+      {
+        "type": "manner",
+        "value": "warily"
+      }
+    ],
+    "displayText": "a slow, quiet bongo grooving warily"
+  }
+]
+```
+
+The corresponding block-level `displayText` might be:
+
+```json
+"displayText": "energetic banjo plays with a slow, quiet bongo grooving warily"
+```
+
+A lightweight authoring workflow may provide only `displayText`. More detailed authoring workflows may additionally provide `descriptionUnits`, allowing renderers to adapt the description semantically.
+
+---
+
+### Segment-Level Properties (`MusicSegment`)
+
+Music segments are optional timed subdivisions of a Music block. They are useful where characteristics change within a single musical event without requiring the entire event to be represented as a new block.
+
+Timing is optional. Where omitted, rendering systems may infer timing from the parent block or neighbouring segments. If `timeStart` is provided with no corresponding `timeStop`, the parent block's `timeStop` is presumed.
+
+| Property | Type | Description |
+|---|---|---|
+| `timeStart` | `String` | Start timestamp of the segment. |
+| `timeStop` | `String` | End timestamp of the segment. |
+| `function` | `Array<String>` | Segment-specific function values overriding the block-level value. |
+| `sonicDescription` | `Object` | Segment-specific sonic properties overriding the block-level value. |
+| `lyrics` | `Object` | Lyrics occurring specifically during this segment. |
+| `displayText` | `String` | Optional authored description specific to the segment. |
+| `descriptionUnits` | `Array<DescriptionUnit>` | Optional structured descriptions specific to the segment. |
+
+Properties omitted from a segment inherit their values from the parent Music block. 
+---
+
+### Example Representation
+
+```json
+{
+  "type": "Music",
+  "timeStart": "00:01:12.000",
+  "timeStop": "00:01:18.500",
+
+  "importance": 4,
+
+  "source": {
+    "isDiegetic": true,
+    "visualPresence": "NOT_IN_SHOT",
+    "location": "Radio behind the kitchen door"
+  },
+
+  "musicMetadata": {
+    "title": "Example Song",
+    "artist": "Example Artist",
+    "year": 1984
+  },
+
+  "musicalAttributes": {
+    "bpm": 128,
+    "key": "A minor",
+    "genre": [
+      "synth-pop",
+      "dance"
+    ]
+  },
+
+  "function": [
+    "SET_MOOD_TONE",
+    "CONVEY_PRESENCE_ABSENCE_PLACE_TIME"
+  ],
+
+  "sonicDescription": {
+    "description": "slightly muffled",
+    "loudness": "QUIET",
+    "frequency": {
+      "dominantRange": "HIGH"
+    }
+  },
+
+  "displayText": "energetic banjo plays with a slow, quiet bongo grooving warily",
+
+  "descriptionUnits": [
+    {
+      "anchor": {
+        "type": "instrument",
+        "value": "banjo"
+      },
+      "descriptors": [
+        {
+          "type": "quality",
+          "value": "energetic"
+        },
+        {
+          "type": "action",
+          "value": "plays"
+        }
+      ],
+      "displayText": "energetic banjo plays"
+    },
+    {
+      "anchor": {
+        "type": "instrument",
+        "value": "bongo"
+      },
+      "descriptors": [
+        {
+          "type": "quality",
+          "value": "slow"
+        },
+        {
+          "type": "quality",
+          "value": "quiet"
+        },
+        {
+          "type": "action",
+          "value": "grooving"
+        },
+        {
+          "type": "manner",
+          "value": "warily"
+        }
+      ],
+      "displayText": "a slow, quiet bongo grooving warily"
+    }
+  ],
+
+  "lyrics": {
+    "original": {
+      "en": "Example lyric line"
+    },
+    "isBurnedIn": false
+  },
+
+  "segments": [
+    {
+      "timeStart": "00:01:16.000",
+      "sonicDescription": {
+        "loudness": "LOUD"
+      }
+    }
+  ],
+
+  "notes": "Music is initially faint but establishes activity occurring off-screen.",
+
+  "tags": [
+    "#party",
+    "#recurring-theme"
+  ],
+
+  "metadata": {
+    "blockId": "550e8400-e29b-41d4-a716-446655440001",
+    "author": "JaneDoe_Editor",
+    "createdAt": "2026-07-01T14:30:00Z",
+    "updatedAt": "2026-07-01T15:10:00Z"
+  }
+}
+```
+
 ## Sound Effects
 
 ## Misc
