@@ -114,7 +114,7 @@ These properties apply to the entire speech event.
 
 | Property | Type | Description |
 |---|---|---|
-| `speakerId` | `Integer` | A unique accession ID for the speaker within the project. |
+| `speakerId` | `Integer` | A unique integer value used to identify a speaker the project. This ID could be shared across videos (e.g., across episodes of a show).|
 | `narrativeName` | `String` | The character's actual name (e.g., `"Sarah"`, `"Prof. X"`). |
 | `descriptiveName` | `String` | A physical or contextual description (e.g., `"Man in red hat"`). |
 | `spoilerName` | `String` | The name to be displayed if character identity `"spoilers"` are desired. |
