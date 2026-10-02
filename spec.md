@@ -212,7 +212,7 @@ This example demonstrates a primarily English sentence with a Spanish phrase emb
     },
     {
       "content": "over here.",
-      "timeStart": "00:01:12.500"
+      "timeStart": "00:01:12.000"
     }
   ]
 }
