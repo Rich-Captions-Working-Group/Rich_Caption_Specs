@@ -1,35 +1,32 @@
-# Rich Captions Specification
-
 Rich Captions uses an object-oriented approach...
-
 
 ## Block
 
-The `Block` is the foundational base class from which all other elements in the format (such as `Speech`) inherit. It defines the universal properties required for temporal positioning, spatial constraints, editor annotations, and system tracking. 
+The `Block` is the foundational base class from which all other elements in the format (such as `Speech`) inherit. It defines the universal properties required for temporal positioning, spatial constraints, editor annotations, and system tracking.
 
 ### Properties
 
-| Property | Type | Description |
-|---|---|---|
-| `timeStart` | `String` | The precise timestamp when the block begins (e.g., `00:01:23.450`). |
-| `timeStop` | `String` | The precise timestamp when the block ends (e.g., `00:01:28.000`). |
-| `positionNoGos` | `Array<Object>` | An array of spatial bounding boxes (defined in X/Y percentages) where captions/UI must *not* be placed to avoid obscuring on-screen text or crucial visual elements. |
-| `notes` | `String` | Free-form text for author comments, context, or translator instructions. |
-| `tags` | `Array<String>` | An array of descriptive markers for categorization, conventionally prefixed with `#`. |
-| `metadata` | `Object` | A nested object containing system and attribution data for the block. |
+| Property        | Type            | Description                                                                                                                                                          |
+| --------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `timeStart`     | `String`        | The precise timestamp when the block begins (e.g., `00:01:23.450`).                                                                                                  |
+| `timeStop`      | `String`        | The precise timestamp when the block ends (e.g., `00:01:28.000`).                                                                                                    |
+| `positionNoGos` | `Array<Object>` | An array of spatial bounding boxes (defined in X/Y percentages) where captions/UI must _not_ be placed to avoid obscuring on-screen text or crucial visual elements. |
+| `notes`         | `String`        | Free-form text for author comments, context, or translator instructions.                                                                                             |
+| `tags`          | `Array<String>` | An array of descriptive markers for categorization, conventionally prefixed with `#`.                                                                                |
+| `metadata`      | `Object`        | A nested object containing system and attribution data for the block.                                                                                                |
 
 ---
 
-### Position No-Go Object 
+### Position No-Go Object
 
 Each object in the `positionNoGos` array defines a restricted rectangular area on the screen using percentages. `0,0` represents the top-left corner.
 
-| Property | Type | Description |
-|---|---|---|
-| `xMin` | `Float` | The left-most edge of the restricted area as a percentage of screen width (0-100). |
-| `xMax` | `Float` | The right-most edge of the restricted area as a percentage of screen width (0-100). |
-| `yMin` | `Float` | The top-most edge of the restricted area as a percentage of screen height (0-100). |
-| `yMax` | `Float` | The bottom-most edge of the restricted area as a percentage of screen height (0-100). |
+| Property | Type    | Description                                                                           |
+| -------- | ------- | ------------------------------------------------------------------------------------- |
+| `xMin`   | `Float` | The left-most edge of the restricted area as a percentage of screen width (0-100).    |
+| `xMax`   | `Float` | The right-most edge of the restricted area as a percentage of screen width (0-100).   |
+| `yMin`   | `Float` | The top-most edge of the restricted area as a percentage of screen height (0-100).    |
+| `yMax`   | `Float` | The bottom-most edge of the restricted area as a percentage of screen height (0-100). |
 
 ---
 
@@ -37,12 +34,12 @@ Each object in the `positionNoGos` array defines a restricted rectangular area o
 
 The `metadata` object encapsulates tracking information. This data does not impact the content itself but is essential for version control, auditing, and collaborative editing.
 
-| Property | Type | Description |
-|---|---|---|
-| `blockId` | `String` | A universally unique identifier (e.g., UUID) for referencing the specific block. |
-| `author` | `String` | The identifier of the user, system, or program that created the block. |
-| `createdAt` | `String` | An ISO 8601 timestamp indicating when the block was generated. |
-| `updatedAt` | `String` | An ISO 8601 timestamp indicating when the block was last modified. |
+| Property    | Type     | Description                                                                      |
+| ----------- | -------- | -------------------------------------------------------------------------------- |
+| `blockId`   | `String` | A universally unique identifier (e.g., UUID) for referencing the specific block. |
+| `author`    | `String` | The identifier of the user, system, or program that created the block.           |
+| `createdAt` | `String` | An ISO 8601 timestamp indicating when the block was generated.                   |
+| `updatedAt` | `String` | An ISO 8601 timestamp indicating when the block was last modified.               |
 
 ---
 
@@ -62,10 +59,7 @@ The `metadata` object encapsulates tracking information. This data does not impa
     }
   ],
   "notes": "Avoid the lower third; burned-in location text appears here.",
-  "tags": [
-    "#action-sync",
-    "#needs-review"
-  ],
+  "tags": ["#action-sync", "#needs-review"],
   "metadata": {
     "blockId": "550e8400-e29b-41d4-a716-446655440000",
     "author": "JaneDoe_Editor",
@@ -74,37 +68,38 @@ The `metadata` object encapsulates tracking information. This data does not impa
   }
 }
 ```
+
 ## Header
 
 The `Header` is a global configuration object that sits at the beginning of every Rich Caption file. It defines file-wide mappings, supported languages, and dictionaries to ensure the block-level data remains lightweight and prevents repetitive declarations.
 
 ### Properties
 
-| Property | Type | Description |
-|---|---|---|
-| `speakers` | `Object` | A dictionary mapping unique `speakerId` integers to their default `speaker` objects (names and descriptions). |
+| Property             | Type     | Description                                                                                                                       |
+| -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `speakers`           | `Object` | A dictionary mapping unique `speakerId` integers to their default `speaker` objects (names and descriptions).                     |
 | `supportedLanguages` | `Object` | Key-value pairs of ISO language codes used in the file to their human-readable names (e.g., `{"pt-BR": "Brazilian Portuguese"}`). |
 
 ---
 
 ## Speech
 
-*Inherits from:* [`Block`](#block)
+_Inherits from:_ [`Block`](#block)
 
-The `Speech` class represents ways of communicating that have well-established lexical meaning. This includes spoken languages, signed languages, and fictitious/constructed languages. 
+The `Speech` class represents ways of communicating that have well-established lexical meaning. This includes spoken languages, signed languages, and fictitious/constructed languages.
 
 ### Block-Level Properties
 
 These properties apply to the entire speech event.
 
-| Property | Type | Description |
-|---|---|---|
-| `speaker` | `Object` | Identifying information about the entity communicating. |
-| `source` | `Object` | Spatial and diegetic information about where the communication originates. |
-| `lexicalContent` | `Object` | The verbatim communication, translations, and text-display flags. |
-| `importance` | `Integer` | A 1-5 scale indicating the subjective priority of captioning this event (1 = Niche/Extremely low, 5 = Crucial). |
-| `annotations` | `Object` | Block-level defaults for manner of speech and sonic properties. These apply to all segments unless overridden. |
-| `segments` | `Array<Segment>` | An ordered list of `Segment` objects breaking the block down into smaller timed units (e.g., words, phrases, syllables). |
+| Property         | Type             | Description                                                                                                              |
+| ---------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `speaker`        | `Object`         | Identifying information about the entity communicating.                                                                  |
+| `source`         | `Object`         | Spatial and diegetic information about where the communication originates.                                               |
+| `lexicalContent` | `Object`         | The verbatim communication, translations, and text-display flags.                                                        |
+| `importance`     | `Integer`        | A 1-5 scale indicating the subjective priority of captioning this event (1 = Niche/Extremely low, 5 = Crucial).          |
+| `annotations`    | `Object`         | Block-level defaults for manner of speech and sonic properties. These apply to all segments unless overridden.           |
+| `segments`       | `Array<Segment>` | An ordered list of `Segment` objects breaking the block down into smaller timed units (e.g., words, phrases, syllables). |
 
 ---
 
@@ -112,41 +107,42 @@ These properties apply to the entire speech event.
 
 #### Speaker Object (`speaker`)
 
-| Property | Type | Description |
-|---|---|---|
-| `speakerId` | `Integer` | A unique integer value used to identify a speaker the project. This ID could be shared across videos (e.g., across episodes of a show).|
-| `narrativeName` | `String` | The character's actual name (e.g., `"Sarah"`, `"Prof. X"`). |
-| `descriptiveName` | `String` | A physical or contextual description (e.g., `"Man in red hat"`). |
-| `spoilerName` | `String` | The name to be displayed if character identity `"spoilers"` are desired. |
+| Property          | Type      | Description                                                                                                                             |
+| ----------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `speakerId`       | `Integer` | A unique integer value used to identify a speaker the project. This ID could be shared across videos (e.g., across episodes of a show). |
+| `narrativeName`   | `String`  | The character's actual name (e.g., `"Sarah"`, `"Prof. X"`).                                                                             |
+| `descriptiveName` | `String`  | A physical or contextual description (e.g., `"Man in red hat"`).                                                                        |
+| `spoilerName`     | `String`  | The name to be displayed if character identity `"spoilers"` are desired.                                                                |
 
 #### Source Object (`source`)
 
-| Property | Type | Description |
-|---|---|---|
-| `isDiegetic` | `Boolean` | `true` if the source exists within the world of the video (e.g., a radio playing in a scene); `false` if external (e.g., a narrator). |
-| `visualPresence` | `Enum` | Options: `"FOCUS"`, `"CLEARLY_IN_SHOT"`, `"SOMEWHAT_IN_SHOT"`, `"NOT_IN_SHOT"`. |
-| `location` | `String` | Descriptive location of the source (e.g., `"Behind the door"`, `"Over the PA system"`). |
+| Property         | Type      | Description                                                                                                                           |
+| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `isDiegetic`     | `Boolean` | `true` if the source exists within the world of the video (e.g., a radio playing in a scene); `false` if external (e.g., a narrator). |
+| `visualPresence` | `Enum`    | Options: `"FOCUS"`, `"CLEARLY_IN_SHOT"`, `"SOMEWHAT_IN_SHOT"`, `"NOT_IN_SHOT"`.                                                       |
+| `location`       | `String`  | Descriptive location of the source (e.g., `"Behind the door"`, `"Over the PA system"`).                                               |
 
 #### Lexical Content Object (`lexicalContent`)
 
-| Property | Type | Description |
-|---|---|---|
-| `original` | `Object` | The verbatim communication in its primary language, keyed by ISO code (e.g., `{"es": "..."}`). |
-| `translations` | `Object` | Key-value pairs of ISO language codes to translated strings (e.g., `{"en": "...", "es": "...", "en-simplified": "..."}`). |
-| `isBurnedIn` | `Boolean` | `true` if this specific block is already burned into the source video file as open captions. |
+| Property       | Type      | Description                                                                                                               |
+| -------------- | --------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `original`     | `Object`  | The verbatim communication in its primary language, keyed by ISO code (e.g., `{"es": "..."}`).                            |
+| `translations` | `Object`  | Key-value pairs of ISO language codes to translated strings (e.g., `{"en": "...", "es": "...", "en-simplified": "..."}`). |
+| `isBurnedIn`   | `Boolean` | `true` if this specific block is already burned into the source video file as open captions.                              |
 
 #### Annotations Object (`annotations`)
-*Note: This object can exist at both the Block level (as a default) and the Segment level (as an override).*
 
-| Property | Type | Description |
-|---|---|---|
-| `language` | `String` | **(Segment-level only)** ISO language code overriding the block's primary language. Used for code-switching (mixed languages). |
-| `mannerOfSpeech` | `String` | The affect or style of communication (e.g., `"Sarcastic"`, `"Happy"`). |
-| `accentGeneral` | `String` | Description of an accent in general terms, such as a country, large region, or cultural group (e.g., `"Thick Australian accent"`, `"Deaf accent"`). |
-| `accentSpecific` | `String` | Description of a highly specific accent, such as a region within a nation (e.g., `"Thick Texan accent"`). |
-| `impersonation` | `String` | Descriptive string if the speaker is mimicking another entity (e.g., `"As Dolly Parton"`). |
-| `sonicDescription` | `String` | Environmental effects altering the sound (e.g., `"Muffled"`, `"Distorted"`). |
-| `vocalEffort` | `Enum` | Options: `"WHISPER"`, `"NORMAL"`, `"SHOUT"`. |
+_Note: This object can exist at both the Block level (as a default) and the Segment level (as an override)._
+
+| Property           | Type     | Description                                                                                                                                         |
+| ------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `language`         | `String` | **(Segment-level only)** ISO language code overriding the block's primary language. Used for code-switching (mixed languages).                      |
+| `mannerOfSpeech`   | `String` | The affect or style of communication (e.g., `"Sarcastic"`, `"Happy"`).                                                                              |
+| `accentGeneral`    | `String` | Description of an accent in general terms, such as a country, large region, or cultural group (e.g., `"Thick Australian accent"`, `"Deaf accent"`). |
+| `accentSpecific`   | `String` | Description of a highly specific accent, such as a region within a nation (e.g., `"Thick Texan accent"`).                                           |
+| `impersonation`    | `String` | Descriptive string if the speaker is mimicking another entity (e.g., `"As Dolly Parton"`).                                                          |
+| `sonicDescription` | `String` | Environmental effects altering the sound (e.g., `"Muffled"`, `"Distorted"`).                                                                        |
+| `vocalEffort`      | `Enum`   | Options: `"WHISPER"`, `"NORMAL"`, `"SHOUT"`.                                                                                                        |
 
 ---
 
@@ -154,11 +150,11 @@ These properties apply to the entire speech event.
 
 Segments are the lowest configurable units within a `Speech` block. Timing is optional at the segment level; if omitted, rendering engines should interpolate based on the parent Block's start and stop times.
 
-| Property | Type | Description |
-|---|---|---|
-| `content` | `String` | The specific unit of communication (e.g., a word, syllable, or punctuation mark). |
-| `timeStart` | `String` | The start timestamp of this specific segment. |
-| `timeStop` | `String` | The end timestamp of this specific segment. |
+| Property      | Type     | Description                                                                           |
+| ------------- | -------- | ------------------------------------------------------------------------------------- |
+| `content`     | `String` | The specific unit of communication (e.g., a word, syllable, or punctuation mark).     |
+| `timeStart`   | `String` | The start timestamp of this specific segment.                                         |
+| `timeStop`    | `String` | The end timestamp of this specific segment.                                           |
 | `annotations` | `Object` | Segment-specific overrides, such as language shifts (code-switching) or vocal effort. |
 
 ---
@@ -218,10 +214,9 @@ This example demonstrates a primarily English sentence with a Spanish phrase emb
 }
 ```
 
-
 ## Music
 
-*Inherits from:* [`Block`](#block)
+_Inherits from:_ [`Block`](#block)
 
 The `Music` class represents a time-bounded musical event. A Music block may describe an entire musical work, an excerpt from a work, incidental music, a recurring motif, or another temporally distinct musical event.
 
@@ -229,19 +224,19 @@ Music descriptions may contain both structured information about the music itsel
 
 ### Block-Level Properties
 
-| Property | Type | Description |
-|---|---|---|
-| `source` | `Object` | Spatial and diegetic information about where the music originates. Uses the same `Source` object as `Speech`. |
-| `importance` | `Integer` | A 1–5 scale indicating the subjective priority of captioning this musical event (1 = Niche/Extremely low, 5 = Crucial). |
-| `musicMetadata` | `Object` | Information identifying the musical work or recording, where known. |
-| `musicalAttributes` | `Object` | Structured musical characteristics such as tempo, key, and genre. |
-| `function` | `Array<String>` | One or more functions the music serves within the audiovisual material. |
-| `sonicDescription` | `Object` | Perceptual characteristics of how the music sounds in this event. |
-| `lyrics` | `Object` | Lyrics occurring during this musical event, where applicable. |
-| `displayText` | `String` | Optional authored natural-language description of the musical event. May be used directly by renderers or as a fallback when richer structure is unavailable (e.g., the sentence `"Energetic drums bang on while a deep, synth bass quakes"` might be provided as a fallback to a structured representation of the two instruments). |
-| `descriptionUnits` | `Array<DescriptionUnit>` | Structured descriptions of individual musically relevant objects or layers, such as instruments, rhythms, motifs, or voices. |
-| `segments` | `Array<MusicSegment>` | Optional timed subdivisions of the musical event. Segment-level values override corresponding block-level values. When a segment supplies a nested object, only the properties explicitly supplied by the segment override the corresponding block-level properties. Other properties continue to inherit from the parent block. For example, a block may define `"QUIET"` as its `loudness`, while a segment may override this with `"LOUD"`. The override applied only to that segment; other properties continue to inherit from the parent block.
- |
+| Property            | Type                     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source`            | `Object`                 | Spatial and diegetic information about where the music originates. Uses the same `Source` object as `Speech`.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `importance`        | `Integer`                | A 1–5 scale indicating the subjective priority of captioning this musical event (1 = Niche/Extremely low, 5 = Crucial).                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `musicMetadata`     | `Object`                 | Information identifying the musical work or recording, where known.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `musicalAttributes` | `Object`                 | Structured musical characteristics such as tempo, key, and genre.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `function`          | `Array<String>`          | One or more functions the music serves within the audiovisual material.                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `sonicDescription`  | `Object`                 | Perceptual characteristics of how the music sounds in this event.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `lyrics`            | `Object`                 | Lyrics occurring during this musical event, where applicable.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `displayText`       | `String`                 | Optional authored natural-language description of the musical event. May be used directly by renderers or as a fallback when richer structure is unavailable (e.g., the sentence `"Energetic drums bang on while a deep, synth bass quakes"` might be provided as a fallback to a structured representation of the two instruments).                                                                                                                                                                                                                  |
+| `descriptionUnits`  | `Array<DescriptionUnit>` | Structured descriptions of individual musically relevant objects or layers, such as instruments, rhythms, motifs, or voices.                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `segments`          | `Array<MusicSegment>`    | Optional timed subdivisions of the musical event. Segment-level values override corresponding block-level values. When a segment supplies a nested object, only the properties explicitly supplied by the segment override the corresponding block-level properties. Other properties continue to inherit from the parent block. For example, a block may define `"QUIET"` as its `loudness`, while a segment may override this with `"LOUD"`. The override applied only to that segment; other properties continue to inherit from the parent block. |
+|                     |
 
 ---
 
@@ -251,17 +246,17 @@ Music descriptions may contain both structured information about the music itsel
 
 Common metadata is represented through explicitly defined properties. Less common metadata may be included using `additionalMetadata`, allowing the format to remain extensible without requiring a predefined field for every possible music-industry metadata standard.
 
-| Property | Type | Description |
-|---|---|---|
-| `title` | `String` | Title of the musical work or recording. |
-| `artist` | `String` | Primary credited artist or performer. |
-| `year` | `Integer` | Year of release, where known. |
-| `album` | `String` | Album or collection containing the recording. |
-| `composer` | `Array<String>` | Composer or composers of the musical work. |
-| `lyricist` | `Array<String>` | Lyricist or lyricists. |
-| `copyrightOwner` | `Array<String>` | Copyright owner or owners, where relevant and known. |
-| `identifiers` | `Object` | Known external identifiers, expressed as key-value pairs using the identifier scheme as the key. |
-| `additionalMetadata` | `Object` | Additional metadata not represented by the predefined properties. |
+| Property             | Type            | Description                                                                                      |
+| -------------------- | --------------- | ------------------------------------------------------------------------------------------------ |
+| `title`              | `String`        | Title of the musical work or recording.                                                          |
+| `artist`             | `String`        | Primary credited artist or performer.                                                            |
+| `year`               | `Integer`       | Year of release, where known.                                                                    |
+| `album`              | `String`        | Album or collection containing the recording.                                                    |
+| `composer`           | `Array<String>` | Composer or composers of the musical work.                                                       |
+| `lyricist`           | `Array<String>` | Lyricist or lyricists.                                                                           |
+| `copyrightOwner`     | `Array<String>` | Copyright owner or owners, where relevant and known.                                             |
+| `identifiers`        | `Object`        | Known external identifiers, expressed as key-value pairs using the identifier scheme as the key. |
+| `additionalMetadata` | `Object`        | Additional metadata not represented by the predefined properties.                                |
 
 #### Example
 
@@ -286,11 +281,11 @@ Common metadata is represented through explicitly defined properties. Less commo
 
 `musicalAttributes` contains structured characteristics of the music itself. These describe the musical event as a whole rather than individual description units.
 
-| Property | Type | Description |
-|---|---|---|
-| `bpm` | `Float` | Approximate tempo in beats per minute. |
-| `key` | `String` | Musical key, where identifiable and relevant. |
-| `genre` | `Array<String>` | One or more genres or musical styles associated with the event (e.g., `["synth-pop", "dance"]`). |
+| Property | Type            | Description                                                                                      |
+| -------- | --------------- | ------------------------------------------------------------------------------------------------ |
+| `bpm`    | `Float`         | Approximate tempo in beats per minute.                                                           |
+| `key`    | `String`        | Musical key, where identifiable and relevant.                                                    |
+| `genre`  | `Array<String>` | One or more genres or musical styles associated with the event (e.g., `["synth-pop", "dance"]`). |
 
 ---
 
@@ -323,24 +318,23 @@ Further functions may be added as the specification develops.
 
 `sonicDescription` describes perceptual properties of the musical event. These properties concern how the music sounds within the scene rather than its musical identity.
 
-| Property | Type | Description |
-|---|---|---|
+| Property      | Type     | Description                                                                                          |
+| ------------- | -------- | ---------------------------------------------------------------------------------------------------- |
 | `description` | `String` | Free-form description of relevant sonic qualities, such as `"muffled"`, `"distorted"`, or `"tinny"`. |
-| `loudness` | `Enum` | Loudness relative to other sounds in the scene. Options: `"QUIET"`, `"MEDIUM"`, `"LOUD"`. |
-| `frequency` | `Object` | Optional description of the frequency characteristics of the event. |
+| `loudness`    | `Enum`   | Loudness relative to other sounds in the scene. Options: `"QUIET"`, `"MEDIUM"`, `"LOUD"`.            |
+| `frequency`   | `Object` | Optional description of the frequency characteristics of the event.                                  |
 
 #### Frequency Object
 
 The representation of frequency characteristics remains provisional. This is intended to support viewers who may find it challenging to perceive some frequencies but not others (e.g., someone who may want musical events with predominantly high-frequency content to be captioned more consistently because of hearing loss at higher frequencies).
 
-| Property | Type | Description |
-|---|---|---|
+| Property        | Type   | Description                                                       |
+| --------------- | ------ | ----------------------------------------------------------------- |
 | `dominantRange` | `Enum` | Predominant frequency range. Options: `"LOW"`, `"MID"`, `"HIGH"`. |
 
 ::: issue Issue Notice
-  I had a reference to an additional "ML profile" with low, medium, and high values. I don't have a note describing what this is, and, er, I forgot. —Caluã
+I had a reference to an additional "ML profile" with low, medium, and high values. I don't have a note describing what this is, and, er, I forgot. —Caluã
 :::
-
 
 ---
 
@@ -348,11 +342,11 @@ The representation of frequency characteristics remains provisional. This is int
 
 `lyrics` contains sung or otherwise musically performed lexical content occurring within the Music block.
 
-| Property | Type | Description |
-|---|---|---|
-| `original` | `Object` | Lyrics in their original language, keyed by ISO language code. |
-| `translations` | `Object` | Optional translations, keyed by ISO language code. |
-| `isBurnedIn` | `Boolean` | `true` if the lyrics are already displayed as part of the source video. |
+| Property       | Type      | Description                                                             |
+| -------------- | --------- | ----------------------------------------------------------------------- |
+| `original`     | `Object`  | Lyrics in their original language, keyed by ISO language code.          |
+| `translations` | `Object`  | Optional translations, keyed by ISO language code.                      |
+| `isBurnedIn`   | `Boolean` | `true` if the lyrics are already displayed as part of the source video. |
 
 #### Example
 
@@ -378,42 +372,41 @@ A unit is organised around an `anchor`: the primary musical element being descri
 
 This structure allows information about different musical elements to remain semantically associated. For example, in:
 
-> *energetic banjo plays with a slow, quiet bongo grooving warily*
+> _energetic banjo plays with a slow, quiet bongo grooving warily_
 
 `energetic` and `plays` may be associated with the banjo, while `slow`, `quiet`, `grooving`, and `warily` may be associated with the bongo.
 
 For the moment, description units do **not** have independent importance values. Renderers may select or transform structured information according to user preferences and available space, but the specification does not require captioners to assign a relative priority to every musical object or descriptor.
 
 ::: note Basic Note
-  `displayText` preserves an authored surface rendering. `descriptionUnits` encode semantic information and are not required to reproduce `displayText` verbatim; renderers may introduce, remove, or reorder grammatical material when constructing captions from structured data.
+`displayText` preserves an authored surface rendering. `descriptionUnits` encode semantic information and are not required to reproduce `displayText` verbatim; renderers may introduce, remove, or reorder grammatical material when constructing captions from structured data.
 :::
 
 ::: note Basic Note
-  Descriptors associated with an anchor do not override corresponding block-level structured properties. For example, describing an instrument as `"quiet"` does not change the event-level `sonicDescription.loudness`.
+Descriptors associated with an anchor do not override corresponding block-level structured properties. For example, describing an instrument as `"quiet"` does not change the event-level `sonicDescription.loudness`.
 :::
-
 
 #### Description Unit Object
 
-| Property | Type | Description |
-|---|---|---|
-| `anchor` | `Object` | The primary musical element described by the unit. |
+| Property      | Type            | Description                                        |
+| ------------- | --------------- | -------------------------------------------------- |
+| `anchor`      | `Object`        | The primary musical element described by the unit. |
 | `descriptors` | `Array<Object>` | Structured descriptors associated with the anchor. |
-| `displayText` | `String` | Optional authored rendering of the complete unit. |
+| `displayText` | `String`        | Optional authored rendering of the complete unit.  |
 
 #### Anchor Object
 
-| Property | Type | Description |
-|---|---|---|
-| `type` | `String` | Semantic category of the anchor, such as `"instrument"`, `"voice"`, `"rhythm"`, `"motif"`, or `"music"`. |
-| `value` | `String` | Human-readable identification of the anchor, such as `"banjo"`, `"bongo"`, or `"Woody's theme"`. |
+| Property | Type     | Description                                                                                              |
+| -------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `type`   | `String` | Semantic category of the anchor, such as `"instrument"`, `"voice"`, `"rhythm"`, `"motif"`, or `"music"`. |
+| `value`  | `String` | Human-readable identification of the anchor, such as `"banjo"`, `"bongo"`, or `"Woody's theme"`.         |
 
 #### Descriptor Object
 
-| Property | Type | Description |
-|---|---|---|
-| `type` | `String` | Semantic role of the descriptor, such as `"quality"`, `"action"`, `"manner"`, or `"affectiveQuality"`. |
-| `value` | `String` | Descriptive value associated with the anchor. |
+| Property | Type     | Description                                                                                            |
+| -------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `type`   | `String` | Semantic role of the descriptor, such as `"quality"`, `"action"`, `"manner"`, or `"affectiveQuality"`. |
+| `value`  | `String` | Descriptive value associated with the anchor.                                                          |
 
 The descriptor vocabulary is intentionally extensible. Renderers should not assume that the order of descriptors corresponds to their relative importance or necessarily to their surface order in a particular language.
 
@@ -482,18 +475,17 @@ Music segments are optional timed subdivisions of a Music block. They are useful
 
 Timing is optional. Where omitted, rendering systems may infer timing from the parent block or neighbouring segments. If `timeStart` is provided with no corresponding `timeStop`, the parent block's `timeStop` is presumed.
 
-| Property | Type | Description |
-|---|---|---|
-| `timeStart` | `String` | Start timestamp of the segment. |
-| `timeStop` | `String` | End timestamp of the segment. |
-| `function` | `Array<String>` | Segment-specific function values overriding the block-level value. |
-| `sonicDescription` | `Object` | Segment-specific sonic properties overriding the block-level value. |
-| `lyrics` | `Object` | Lyrics occurring specifically during this segment. |
-| `displayText` | `String` | Optional authored description specific to the segment. |
-| `descriptionUnits` | `Array<DescriptionUnit>` | Optional structured descriptions specific to the segment. |
+| Property           | Type                     | Description                                                         |
+| ------------------ | ------------------------ | ------------------------------------------------------------------- |
+| `timeStart`        | `String`                 | Start timestamp of the segment.                                     |
+| `timeStop`         | `String`                 | End timestamp of the segment.                                       |
+| `function`         | `Array<String>`          | Segment-specific function values overriding the block-level value.  |
+| `sonicDescription` | `Object`                 | Segment-specific sonic properties overriding the block-level value. |
+| `lyrics`           | `Object`                 | Lyrics occurring specifically during this segment.                  |
+| `displayText`      | `String`                 | Optional authored description specific to the segment.              |
+| `descriptionUnits` | `Array<DescriptionUnit>` | Optional structured descriptions specific to the segment.           |
 
-Properties omitted from a segment inherit their values from the parent Music block. 
----
+## Properties omitted from a segment inherit their values from the parent Music block.
 
 ### Example Representation
 
@@ -520,16 +512,10 @@ Properties omitted from a segment inherit their values from the parent Music blo
   "musicalAttributes": {
     "bpm": 128,
     "key": "A minor",
-    "genre": [
-      "synth-pop",
-      "dance"
-    ]
+    "genre": ["synth-pop", "dance"]
   },
 
-  "function": [
-    "SET_MOOD_TONE",
-    "CONVEY_PRESENCE_ABSENCE_PLACE_TIME"
-  ],
+  "function": ["SET_MOOD_TONE", "CONVEY_PRESENCE_ABSENCE_PLACE_TIME"],
 
   "sonicDescription": {
     "description": "slightly muffled",
@@ -604,10 +590,7 @@ Properties omitted from a segment inherit their values from the parent Music blo
 
   "notes": "Music is initially faint but establishes activity occurring off-screen.",
 
-  "tags": [
-    "#party",
-    "#recurring-theme"
-  ],
+  "tags": ["#party", "#recurring-theme"],
 
   "metadata": {
     "blockId": "550e8400-e29b-41d4-a716-446655440001",
@@ -620,31 +603,299 @@ Properties omitted from a segment inherit their values from the parent Music blo
 
 ## Sound Effects
 
-## Misc
+**Inherits from:** [`Block`](#block)
 
+The `SoundEffect` class represents a time-bounded non-lexical, non-musical sound event. A SoundEffect block may describe an individual sound, a sequence of related sounds, a continuous environmental sound, or another temporally distinct auditory event.
+
+Sound effect descriptions may contain both structured information about the sound itself and authored natural-language descriptions. Structured information allows rendering systems to adapt captions according to user preferences and available display space, while authored text provides a lightweight fallback and allows captioners to preserve descriptions that cannot easily be decomposed.
+
+### Block-Level Properties
+
+| Property           | Type                        | Description                                                                                                                                                  |
+| ------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `source`           | `Object`                    | Spatial and diegetic information about where the sound originates. Uses the same `Source` object as `Speech` and `Music`.                                    |
+| `importance`       | `Integer`                   | A 1–5 scale indicating the subjective priority of captioning this event (1 = Niche/Extremely low, 5 = Crucial).                                              |
+| `soundMetadata`    | `Object`                    | Information identifying a specific or culturally recognisable sound, or information about its production, where known.                                       |
+| `function`         | `Array<String>`             | One or more functions the sound serves within the audiovisual material.                                                                                      |
+| `sonicDescription` | `Object`                    | Perceptual characteristics of how the sound is heard in the scene.                                                                                           |
+| `displayText`      | `String`                    | Optional authored natural-language description of the sound effect. May be used directly by renderers or as a fallback when richer structure is unavailable. |
+| `descriptionUnits` | `Array<DescriptionUnit>`    | Structured descriptions of individual sounds, sound sources, actions, or other relevant elements within the event.                                           |
+| `segments`         | `Array<SoundEffectSegment>` | Optional timed subdivisions of the sound effect event. Segment-level values override corresponding block-level values.                                       |
+
+---
+
+### Sound Metadata Object (`soundMetadata`)
+
+`soundMetadata` identifies a specific or culturally recognisable sound, or provides information about the production of the sound, where this information is known. All fields are optional.
+
+| Property             | Type      | Description                                                                            |
+| -------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `name`               | `String`  | Name or recognised identity of the sound, where known.                                 |
+| `category`           | `String`  | General category of sound.                                                             |
+| `year`               | `Integer` | Year associated with the original recording or creation of the sound, where known.     |
+| `source`             | `String`  | Original work, collection, recording, or other source from which the sound originates. |
+| `performer`          | `String`  | Performer responsible for the sound, where applicable.                                 |
+| `recordingTechnique` | `String`  | Information about how the sound was recorded or produced, where relevant.              |
+| `identifiers`        | `Object`  | External or domain-specific identifiers, where available.                              |
+| `additionalMetadata` | `Object`  | Additional metadata not represented by the predefined properties.                      |
+
+Example:
+
+```json
+"soundMetadata": {
+  "name": "Wilhelm scream",
+  "category": "Human vocalisation",
+  "year": 1951,
+  "source": "Distant Drums",
+  "performer": "Sheb Wooley (attributed)",
+  "recordingTechnique": "Studio-recorded sound effect",
+  "identifiers": {
+    "assetId": "SFX-HUM-SCREAM-001",
+    "libraryId": "WB-SFX-0427"
+  },
+  "additionalMetadata": {
+    "originalScene": "Recorded for a scene in which a man is attacked by an alligator",
+    "laterAssociation": "Named after Private Wilhelm in The Charge at Feather River (1953)",
+    "library": "Warner Bros. sound effects library"
+  }
+}
+```
+
+---
+
+### Source (`source`)
+
+<!--
+Uses the shared Source object currently used by Speech and Music.
+
+TODO:
+- Check whether the existing Source object is sufficient for Sound Effects.
+- Sound Effects notes specifically require:
+  - diegetic / non-diegetic
+  - visual presence / redundancy:
+    - focus of shot / extremely obvious
+    - clearly in shot
+    - somewhat in shot
+    - not in shot
+  - spatial direction: left / right / up / down
+  - free-form location, e.g. "behind the door", "from the stage"
+  - diffuse source, e.g. "from all around"
+  - movement, e.g. "moving left to right"
+- Decide whether direction and movement should extend the shared Source object
+  or be SoundEffect-specific properties.
+-->
+
+---
+
+### Importance (`importance`)
+
+<!--
+Probably reuse the existing 1–5 importance scale.
+
+TODO:
+- Confirm Sound Effects uses the same scale as Music.
+- Original notes frame this as how much the interpretation of the content
+  would be affected if the sound were not accessible.
+- Avoid duplicating the full definition if this can simply reference the
+  shared importance convention.
+-->
+
+---
+
+### Function (`function`)
+
+<!--
+Original Sound Effects notes propose multiple selectable functions:
+- SET_MOOD_TONE
+- CONVEY_PRESENCE_ABSENCE_PLACE_TIME
+- CONNECT_TO_CULTURAL_TOPICS
+
+TODO:
+- Decide whether these are sufficient for Sound Effects.
+- Consider whether Sound Effects needs functions not relevant to Music,
+  e.g. communicating an event/action, warning/alerting, or providing
+  narrative information.
+- Keep function distinct from importance.
+-->
+
+---
+
+### Sonic Description Object (`sonicDescription`)
+
+<!--
+Describe HOW the sound is heard rather than WHAT caused the sound.
+
+Notes include:
+- free-form sonic qualities, e.g. "muffled", "warbly"
+- loudness relative to the scene: quiet / medium / loud
+- frequency characteristics
+
+TODO:
+- Determine whether this can use exactly the same sonicDescription structure
+  as Music or whether Sound Effects needs additional properties.
+- Consider whether characteristics such as abruptness, repetition, duration,
+  reverberation, distortion, etc. belong here or in descriptionUnits.
+-->
+
+#### Frequency Object (`frequency`)
+
+<!--
+Notes propose:
+- dominant range: low / medium / high
+- potentially more detailed frequency information / ML-derived profile
+
+TODO:
+- Probably reuse the Music Frequency object.
+- Check whether anything Sound Effect-specific is required.
+-->
+
+---
+
+### Description Units (`descriptionUnits`)
+
+<!--
+This is likely the main Sound Effect-specific semantic structure.
+
+Original notes distinguish between:
+- the sound itself (noun): "beep"
+- the action/event causing the sound (verb): "camera turns off"
+
+Notes also consider:
+- noun / sound or source
+- verb / action
+- adjectives describing the sound
+- adverbs describing how an action occurs
+
+Examples to support might include:
+- [door slams]
+- [rapid footsteps approaching]
+- [phone vibrates]
+- [woman gasps]
+- [distant explosion]
+- [camera beeps and turns off]
+
+TODO:
+- Decide what the equivalent of Music's Anchor is for Sound Effects.
+- Decide whether sound/source and action need distinct structured fields.
+- Decide which descriptor types are useful.
+- Preserve displayText so authored captions do not have to be reconstructed
+  exactly from the structured representation.
+-->
+
+#### Description Unit Structure
+
+<!--
+TODO:
+Define the Sound Effect DescriptionUnit object.
+
+Likely needs some combination of:
+- anchor / sound identity
+- source
+- action
+- descriptors
+- optional displayText
+
+Do NOT simply copy Music's DescriptionUnit unless it actually represents
+Sound Effects adequately.
+-->
+
+#### Anchors
+
+<!--
+TODO:
+Determine what can be anchored.
+
+Possible concepts from the notes:
+- sound: "beep", "bang", "hum"
+- source/object: "door", "phone", "engine"
+- human/animal non-lexical vocalisation: "gasp", "bark"
+- environmental sound: "thunder", "rain"
+
+Need to decide whether source/object and produced sound are separate concepts.
+-->
+
+#### Descriptors
+
+<!--
+TODO:
+Translate the adjective/adverb ideas from the notes into descriptor types.
+
+Potential concepts:
+- quality: "muffled", "sharp", "warbly"
+- action/manner: "rapidly", "slowly", "violently"
+- affective quality: ??
+- repetition/pattern: ??
+
+Avoid duplicating information already represented by sonicDescription.
+-->
+
+---
+
+### Sound Effect Segments (`segments`)
+
+<!--
+Optional timed subdivisions of a longer SoundEffect block.
+
+Potential use cases:
+- footsteps begin slowly, then accelerate
+- alarm starts quietly and becomes louder
+- engine starts, idles, then revs
+- a sequence of related impacts or mechanical sounds
+
+TODO:
+- Decide which block-level properties can be overridden at segment level.
+- Follow Music's inheritance model where appropriate.
+- Determine whether descriptionUnits can occur at segment level.
+-->
+
+---
+
+### Full Example
+
+<!--
+TODO:
+Create one example that exercises most of the SoundEffect structure.
+
+Ideally choose something richer than a single isolated sound so the example
+can demonstrate:
+- timing
+- source / spatial information
+- importance
+- metadata if appropriate
+- function
+- sonic description
+- description units
+- authored displayText
+- segments
+
+Possible example: a recognisable sound followed by an action/sequence,
+or a sound moving through the scene.
+-->
+
+## Misc
 
 # Design Principles
 
-The intial version of the Rich Captioning Specifications was designed by Benjamin Gorman, Caluã de Lacerda Pataca, Saad Hassan, and Lloyd May. They attempted to follow the following design principles while constructing the first version: 
+The intial version of the Rich Captioning Specifications was designed by Benjamin Gorman, Caluã de Lacerda Pataca, Saad Hassan, and Lloyd May. They attempted to follow the following design principles while constructing the first version:
 
-* **Technology-aware approach:**
-  * We are imagining this format from scratch and are assuming a translation/interpretation layer exists to transform an RC file into webVTT, srt, etc.
-  * While imagining the format from scratch, where two options seem equally valid, we choose the one that interacts most favorably with existing caption formats.
+- **Technology-aware approach:**
+  - We are imagining this format from scratch and are assuming a translation/interpretation layer exists to transform an RC file into webVTT, srt, etc.
+  - While imagining the format from scratch, where two options seem equally valid, we choose the one that interacts most favorably with existing caption formats.
 
-* **Descriptive rather than prescriptive:**
-  * We want to describe what is happening as well as the creator’s intent where possible. We do not want to enforce any regulatory or regional guidelines (e.g., FCC, OFCOM, etc.).
+- **Descriptive rather than prescriptive:**
+  - We want to describe what is happening as well as the creator’s intent where possible. We do not want to enforce any regulatory or regional guidelines (e.g., FCC, OFCOM, etc.).
 
-* **Stylization is out-of-scope:**
-  * Things that affect stylization (color, bold, exact placement on screen, etc.) are out-of-scope. Those visual decisions are deferred to the interpreter/translator program.
+- **Stylization is out-of-scope:**
+  - Things that affect stylization (color, bold, exact placement on screen, etc.) are out-of-scope. Those visual decisions are deferred to the interpreter/translator program.
 
-* **Tag vs. Class distinction:**
-  * If a characteristic is exclusive, it is a *class*; otherwise, it is a *tag*.
+- **Tag vs. Class distinction:**
+  - If a characteristic is exclusive, it is a _class_; otherwise, it is a _tag_.
 
-* **Separation of structure and use case:**
-  * Classes, tags, and attributes are distinct from use cases. For example, *"For hearing aid users"* is a use case, not a class.
+- **Separation of structure and use case:**
+  - Classes, tags, and attributes are distinct from use cases. For example, _"For hearing aid users"_ is a use case, not a class.
 
-* **Sparsity by default:**
-  * Most of the time, fields will be empty (similar to standard JSON behavior).
+- **Sparsity by default:**
+  - Most of the time, fields will be empty (similar to standard JSON behavior).
 
-* **Backward compatibility (Can't break VTT):**
-  * The file must be able to be fed directly into an older, legacy player and still function.
+- **Backward compatibility (Can't break VTT):**
+  - The file must be able to be fed directly into an older, legacy player and still function.
