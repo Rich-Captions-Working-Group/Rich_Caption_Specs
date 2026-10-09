@@ -665,211 +665,933 @@ Example:
 
 ### Source (`source`)
 
-<!--
-Uses the shared Source object currently used by Speech and Music.
+Sound Effects use the same `Source` object as [`Speech`](#source-object-source) and `Music`. This describes whether a sound is diegetic, the visual presence of its source, and its location within the scene.
 
-TODO:
-- Check whether the existing Source object is sufficient for Sound Effects.
-- Sound Effects notes specifically require:
-  - diegetic / non-diegetic
-  - visual presence / redundancy:
-    - focus of shot / extremely obvious
-    - clearly in shot
-    - somewhat in shot
-    - not in shot
-  - spatial direction: left / right / up / down
-  - free-form location, e.g. "behind the door", "from the stage"
-  - diffuse source, e.g. "from all around"
-  - movement, e.g. "moving left to right"
-- Decide whether direction and movement should extend the shared Source object
-  or be SoundEffect-specific properties.
+Sound Effects may also contain additional spatial information describing the apparent direction and movement of a sound. These properties are proposed as extensions to the shared `Source` object and may also be applicable to Speech and Music.
+
+| Property    | Type     | Description                                                                                                            |
+| ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `direction` | `Enum`   | Apparent direction from which the sound is heard. Options: `LEFT`, `RIGHT`, `CENTRE`, `ABOVE`, `BELOW`, `SURROUNDING`. |
+| `movement`  | `Object` | Optional spatial movement of the sound, specifying its starting and ending directions.                                 |
+
+#### Movement Object (`movement`)
+
+| Property | Type   | Description                                                                |
+| -------- | ------ | -------------------------------------------------------------------------- |
+| `from`   | `Enum` | Starting direction of the sound, using the values defined for `direction`. |
+| `to`     | `Enum` | Ending direction of the sound, using the values defined for `direction`.   |
+
+####
+
+**Example 1: Stationary sound source**
+
+The following example describes a telephone ringing in an adjacent room to the left of the viewer.
+
+```json
+{
+  "source": {
+    "isDiegetic": true,
+    "visualPresence": "NOT_IN_SHOT",
+    "location": "Inside the neighbouring room",
+    "direction": "LEFT"
+  }
+}
+```
+
+The telephone is not visible, but its sound originates from the left. As the sound remains stationary, no `movement` property is required.
+
+**Example 2: Moving sound source**
+
+The following example describes an aeroplane flying overhead, with its engine noise moving from left to right.
+
+```json
+{
+  "source": {
+    "isDiegetic": true,
+    "visualPresence": "CLEARLY_IN_SHOT",
+    "location": "An aeroplane flying overhead",
+    "direction": "LEFT",
+    "movement": {
+      "from": "LEFT",
+      "to": "RIGHT"
+    }
+  }
+}
+```
+
+The engine noise initially comes from the left and moves towards the right as the aeroplane passes overhead. The `movement` object describes this directional change over the duration of the event.
+
+<!-- TODO:
+- SHARED SOURCE OBJECT:
+  Direction and movement are proposed additions to the existing Source
+  object used by Speech and Music. If agreed, these properties should
+  be incorporated into the shared definition rather than maintained
+  separately within SoundEffect.
+
+- DIRECTION:
+  Confirm the proposed enum values: LEFT, RIGHT, CENTRE, ABOVE,
+  BELOW, SURROUNDING.
+  Consider whether SURROUNDING should instead represent a separate
+  spatial characteristic, since it describes a diffuse rather than
+  directional source.
+
+- MOVEMENT:
+  The proposed from/to structure supports straightforward directional
+  movement but does not fully represent more complex trajectories.
+  Consider whether additional movement types (e.g., CIRCLING,
+  APPROACHING, RECEDING) are necessary.
+  Clarify how direction relates to movement.from when both are supplied,
+  to avoid redundant or contradictory values.
+
+- SEGMENT-LEVEL CHANGES:
+  Use SoundEffect segments to represent changes in direction, movement
+  and visualPresence over time, following the inheritance/override
+  approach established by Music.
+  Confirm that nested Source properties can be overridden independently
+  at segment level.
+
+- FUTURE EXAMPLE:
+  Consider a more complex example in the Sound Effect Segments section:
+  Tinker Bell's magical chimes begin off-screen, swirl from left to
+  right, and become associated with a visible source when she enters
+  the shot. This could demonstrate spatial movement, changes in
+  visualPresence and timed segment-level overrides.
+
 -->
-
----
 
 ### Importance (`importance`)
 
-<!--
-Probably reuse the existing 1–5 importance scale.
+The `importance` property uses the same 1–5 scale as `Speech` and `Music`, indicating the subjective priority of captioning a sound effect.
 
-TODO:
-- Confirm Sound Effects uses the same scale as Music.
-- Original notes frame this as how much the interpretation of the content
-  would be affected if the sound were not accessible.
-- Avoid duplicating the full definition if this can simply reference the
-  shared importance convention.
+Importance reflects the extent to which omitting the sound could affect a viewer's interpretation or understanding of the audiovisual content. It does not necessarily correspond to the loudness or prominence of the sound.
+
+For example, a quiet door unlocking may be crucial to understanding a scene, while a loud but incidental background noise may have relatively low importance.
+
+<!-- TODO:
+- Confirm that Sound Effects should use the existing shared
+  1–5 importance scale.
+- Consider whether additional guidance or examples are needed
+  to support consistent importance ratings across captioners.
+- Confirm whether importance can be overridden at segment level
+  when the significance of a sound changes over time.
 -->
 
 ---
 
 ### Function (`function`)
 
-<!--
-Original Sound Effects notes propose multiple selectable functions:
-- SET_MOOD_TONE
-- CONVEY_PRESENCE_ABSENCE_PLACE_TIME
-- CONNECT_TO_CULTURAL_TOPICS
+`function` describes what a sound effect contributes to the audiovisual material. It is distinct from `importance`: function describes the role of the sound, whereas importance concerns the priority of captioning the event.
 
-TODO:
-- Decide whether these are sufficient for Sound Effects.
-- Consider whether Sound Effects needs functions not relevant to Music,
-  e.g. communicating an event/action, warning/alerting, or providing
-  narrative information.
-- Keep function distinct from importance.
+Zero or more functions may be specified. A sound effect may serve multiple functions simultaneously.
+
+The following values are shared with Music:
+
+- `SET_MOOD_TONE`
+- `CONVEY_PRESENCE_ABSENCE_PLACE_TIME`
+- `CONNECT_TO_CULTURAL_TOPICS`
+
+The following additional values are proposed for Sound Effects:
+
+- `CONVEY_ACTION_EVENT` — Communicates an action or event, including those occurring outside the visible scene.
+- `REVEAL_NARRATIVE_INFORMATION` — Provides information that contributes to the viewer's understanding of the narrative, such as revealing an unseen presence, danger or significant development.
+- `SIGNAL_TRANSITION_CHANGE` — Indicates a change in state, activity or situation, such as an engine stopping, a door opening or an alarm activating.
+
+#### Example
+
+A quiet metallic click might indicate a door being unlocked, revealing that someone has gained access to a locked room.
+
+```json
+"function": [
+  "CONVEY_ACTION_EVENT",
+  "REVEAL_NARRATIVE_INFORMATION"
+]
+```
+
+Although the sound may be quiet, it could have high `importance` because it communicates a significant narrative development.
+
+<!-- TODO:
+- Confirm whether these additional narrative functions are useful
+  and sufficiently distinct from the existing Music functions.
+
+- Consider whether CONVEY_ACTION_EVENT and
+  REVEAL_NARRATIVE_INFORMATION overlap, and whether both are needed.
+
+- Consider whether these functions should be shared across Speech,
+  Music and Sound Effects rather than defined separately.
 -->
 
 ---
 
-### Sonic Description Object (`sonicDescription`)
+### Sonic Description (`sonicDescription`)
 
-<!--
-Describe HOW the sound is heard rather than WHAT caused the sound.
+`sonicDescription` describes the perceptual characteristics of a sound effect as heard within the audiovisual material. These properties concern how the sound is heard rather than its source, identity, or narrative function.
 
-Notes include:
-- free-form sonic qualities, e.g. "muffled", "warbly"
-- loudness relative to the scene: quiet / medium / loud
-- frequency characteristics
+The structure follows the `sonicDescription` object defined for Music, allowing perceptual characteristics to be represented consistently across sound event types.
 
-TODO:
-- Determine whether this can use exactly the same sonicDescription structure
-  as Music or whether Sound Effects needs additional properties.
-- Consider whether characteristics such as abruptness, repetition, duration,
-  reverberation, distortion, etc. belong here or in descriptionUnits.
+| Property      | Type     | Description                                                                                                          |
+| ------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `description` | `String` | Free-form description of relevant sonic qualities, such as `"metallic"`, `"muffled"`, `"echoing"`, or `"crackling"`. |
+| `loudness`    | `Enum`   | Perceived loudness relative to other sounds in the scene. Options: `QUIET`, `MEDIUM`, `LOUD`.                        |
+| `frequency`   | `Object` | Optional description of the frequency characteristics of the sound effect. Uses the same structure as Music.         |
+
+#### Example
+
+```json
+"sonicDescription": {
+  "description": "Sharp, metallic, with a lingering echo",
+  "loudness": "LOUD",
+  "frequency": {
+    "dominantRange": "HIGH"
+  }
+}
+```
+
+This example describes a loud, high-pitched metallic sound with a lingering echo, such as a metal object being struck.
+
+<!-- TODO:
+- Consider whether sonicDescription should be defined as a shared
+  object across Speech, Music and Sound Effects.
+
+- Confirm whether the existing loudness values (QUIET, MEDIUM, LOUD)
+  provide sufficient granularity for sound effects.
+
+- Consider whether a single free-text description is sufficient
+  for perceptual qualities, or whether structured descriptors
+  would better support filtering and personalised rendering.
+
+- Clarify the distinction between sonicDescription and
+  descriptionUnits to avoid duplicating information.
+
+- Confirm whether sonicDescription properties can be overridden
+  at segment level to represent changes in the sound over time.
 -->
 
 #### Frequency Object (`frequency`)
 
-<!--
-Notes propose:
-- dominant range: low / medium / high
-- potentially more detailed frequency information / ML-derived profile
+The `frequency` object describes the predominant frequency characteristics of a sound effect. It follows the same structure as the Frequency object defined for Music.
 
-TODO:
-- Probably reuse the Music Frequency object.
-- Check whether anything Sound Effect-specific is required.
+This information may support personalised caption rendering, particularly for viewers who have difficulty perceiving sounds within certain frequency ranges.
+
+| Property        | Type   | Description                                                                     |
+| --------------- | ------ | ------------------------------------------------------------------------------- |
+| `dominantRange` | `Enum` | Predominant frequency range of the sound effect. Options: `LOW`, `MID`, `HIGH`. |
+
+#### Example
+
+```json
+"frequency": {
+  "dominantRange": "HIGH"
+}
+```
+
+This example could describe a high-pitched electronic beep or whistle.
+
+<!-- TODO:
+- Confirm whether LOW, MID and HIGH provide sufficient
+  granularity for sound effects.
+
+- Consider how to represent sounds containing multiple
+  prominent frequency ranges, such as explosions or machinery.
+
+- Determine whether frequency boundaries should be formally
+  defined or remain perceptual categories.
+
+- Consider whether frequency should become a shared object
+  across Speech, Music and Sound Effects.
+
+- Retain the unresolved question from Music regarding
+  the proposed ML profile and its intended purpose.
 -->
 
 ---
 
 ### Description Units (`descriptionUnits`)
 
-<!--
-This is likely the main Sound Effect-specific semantic structure.
+`descriptionUnits` provide structured descriptions of individual sounds, sound sources, actions, or other identifiable elements within a sound effect event.
 
-Original notes distinguish between:
-- the sound itself (noun): "beep"
-- the action/event causing the sound (verb): "camera turns off"
+Each unit is organised around an `anchor`: the primary element being described. Descriptors are associated with that anchor to describe its actions, qualities, or manner.
 
-Notes also consider:
-- noun / sound or source
-- verb / action
-- adjectives describing the sound
-- adverbs describing how an action occurs
+This structure allows information about different elements of a sound effect to remain semantically associated, while supporting different approaches to describing the same auditory event.
 
-Examples to support might include:
-- [door slams]
-- [rapid footsteps approaching]
-- [phone vibrates]
-- [woman gasps]
-- [distant explosion]
-- [camera beeps and turns off]
+#### Sound-Centred and Source-Centred Descriptions
 
-TODO:
-- Decide what the equivalent of Music's Anchor is for Sound Effects.
-- Decide whether sound/source and action need distinct structured fields.
-- Decide which descriptor types are useful.
-- Preserve displayText so authored captions do not have to be reconstructed
-  exactly from the structured representation.
--->
+Description units support two complementary approaches to describing sound effects:
 
-#### Description Unit Structure
+- **Sound-centred descriptions** focus on the audible event itself, such as footsteps, a crash, or a ringing sound.
+- **Source-centred descriptions** focus on the entity or action producing the sound, such as a person walking, a glass breaking, or a telephone ringing.
 
-<!--
-TODO:
-Define the Sound Effect DescriptionUnit object.
+Captioners may use either approach or combine both within the same sound effect event. Where both perspectives are represented in the structured data, rendering systems may select or combine information according to listener preferences and available display space.
 
-Likely needs some combination of:
-- anchor / sound identity
-- source
-- action
-- descriptors
-- optional displayText
+For example, the same event might be described as:
 
-Do NOT simply copy Music's DescriptionUnit unless it actually represents
-Sound Effects adequately.
--->
+- **Sound-centred:** "Heavy footsteps approach."
+- **Source-centred:** "A person walks heavily towards the door."
+- **Combined:** "A person approaches, their heavy footsteps echoing."
 
-#### Anchors
+Neither approach is considered inherently preferable. The appropriate level and focus of description depend on the audiovisual context and the information available to the captioner.
 
-<!--
-TODO:
-Determine what can be anchored.
+As with Music, description units do not currently have independent importance values. Renderers may select or transform structured information according to user preferences and available space, but captioners are not required to assign a relative priority to every element or descriptor.
 
-Possible concepts from the notes:
-- sound: "beep", "bang", "hum"
-- source/object: "door", "phone", "engine"
-- human/animal non-lexical vocalisation: "gasp", "bark"
-- environmental sound: "thunder", "rain"
+`displayText` preserves an authored natural-language rendering, while `descriptionUnits` encode semantic information. Renderers are not required to reproduce the authored text verbatim and may introduce, remove, or reorder grammatical material when constructing captions.
 
-Need to decide whether source/object and produced sound are separate concepts.
--->
+Descriptors associated with an individual anchor do not override corresponding block-level structured properties. For example, describing footsteps as `"quiet"` does not change the event-level `sonicDescription.loudness`.
 
-#### Descriptors
+#### Description Unit Object
 
-<!--
-TODO:
-Translate the adjective/adverb ideas from the notes into descriptor types.
+| Property      | Type            | Description                                                                      |
+| ------------- | --------------- | -------------------------------------------------------------------------------- |
+| `anchor`      | `Object`        | The primary sound, source, action, or other event element described by the unit. |
+| `descriptors` | `Array<Object>` | Structured descriptors associated with the anchor.                               |
+| `displayText` | `String`        | Optional authored rendering of the complete unit.                                |
 
-Potential concepts:
-- quality: "muffled", "sharp", "warbly"
-- action/manner: "rapidly", "slowly", "violently"
-- affective quality: ??
-- repetition/pattern: ??
+#### Anchor Object
 
-Avoid duplicating information already represented by sonicDescription.
+| Property | Type     | Description                                                                                                 |
+| -------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `type`   | `String` | Semantic category of the anchor, such as `"sound"`, `"object"`, `"person"`, `"animal"`, or `"environment"`. |
+| `value`  | `String` | Human-readable identification of the anchor, such as `"footsteps"`, `"person"`, `"keys"`, or `"thunder"`.   |
+
+The anchor vocabulary is intentionally extensible, allowing captioners to represent both audible events and their sources without requiring separate data structures.
+
+#### Descriptor Object
+
+| Property | Type     | Description                                                                                            |
+| -------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `type`   | `String` | Semantic role of the descriptor, such as `"quality"`, `"action"`, `"manner"`, or `"affectiveQuality"`. |
+| `value`  | `String` | Descriptive value associated with the anchor.                                                          |
+
+The descriptor vocabulary is intentionally extensible. Renderers should not assume that the order of descriptors corresponds to their relative importance or necessarily to their surface order in a particular language.
+
+#### Example
+
+The following example demonstrates both sound-centred and source-centred descriptions of footsteps approaching.
+
+```json
+"descriptionUnits": [
+  {
+    "anchor": {
+      "type": "sound",
+      "value": "footsteps"
+    },
+    "descriptors": [
+      {
+        "type": "quality",
+        "value": "heavy"
+      },
+      {
+        "type": "action",
+        "value": "approach"
+      }
+    ],
+    "displayText": "Heavy footsteps approach"
+  },
+  {
+    "anchor": {
+      "type": "person",
+      "value": "person"
+    },
+    "descriptors": [
+      {
+        "type": "action",
+        "value": "walks"
+      },
+      {
+        "type": "manner",
+        "value": "heavily"
+      }
+    ],
+    "displayText": "A person walks heavily"
+  }
+]
+```
+
+The first unit describes the audible footsteps, while the second describes the person producing them. Both describe the same underlying event from different perspectives.
+
+A rendering system could use either description, provided the information is available, or potentially combine them into a more detailed caption.
+
+<!-- TODO:
+- STRUCTURAL CONSOLIDATION:
+  The original placeholder sections "Description Unit Structure",
+  "Anchors" and "Descriptors" have been removed because their
+  intended content is now incorporated into the Description Units
+  section above.
+
+  The Description Unit Object defines the overall structure,
+  including anchors, descriptors and optional displayText.
+  The Anchor and Descriptor Objects define their respective
+  properties. Separate sections would duplicate this information.
+
+- SOUND-CENTRED AND SOURCE-CENTRED DESCRIPTIONS:
+  The structure intentionally supports both descriptions of sounds
+  themselves (e.g., "footsteps approach") and descriptions of their
+  sources or actions (e.g., "a person walks").
+
+  Neither approach is preferred. Captioners may use either or both,
+  and renderers may support different listener preferences where
+  sufficient structured information is available.
+
+  Consider whether alternative descriptions of the same event
+  require explicit relationships or grouping, so renderers can
+  distinguish alternatives from independent sounds.
+
+- SHARED STRUCTURE WITH MUSIC:
+  The anchor/descriptor approach follows Music's Description Units,
+  but has been adapted to accommodate sound effects, their sources
+  and associated actions.
+
+  Consider whether the underlying objects should eventually be
+  shared across Music and Sound Effects, while allowing different
+  anchor categories.
+
+- ANCHOR CATEGORIES:
+  The original brainstorm included sounds, objects/sources,
+  non-lexical human and animal vocalisations, and environmental
+  sounds. These are accommodated through extensible anchor types.
+
+  Review whether controlled categories are needed and how to
+  distinguish a sound from the object or entity producing it.
+
+- DESCRIPTOR CATEGORIES:
+  The current structure supports qualities, actions, manner and
+  affective qualities.
+
+  Consider whether additional descriptor types are needed for
+  repetition and temporal patterns, such as "three rapid knocks",
+  "intermittent beeping" or "rhythmic tapping".
+
+  Determine whether repetition should be represented through
+  descriptors, segments or another structured property.
+
+- SONIC DESCRIPTION:
+  Clarify the boundary between individual descriptors and
+  block-level sonicDescription properties to avoid unnecessary
+  duplication or contradictory values.
+
+- MULTIPLE SOUNDS:
+  Consider how to represent simultaneous, sequential and causally
+  related sounds, including relationships between description units.
+
+- RENDERING:
+  Consider how renderers can select sound-centred, source-centred
+  or combined descriptions based on listener preferences and
+  available display space.
+
+  Renderers should not infer sources, actions or relationships
+  that are not represented in the structured data.
+
+- SEGMENTS:
+  Confirm whether descriptionUnits can be supplied or overridden
+  at segment level when sounds begin, change or end.
+
+- IMPORTANCE:
+  Description Units currently follow Music in not having their
+  own importance values. Revisit whether unit-level importance
+  would improve personalised caption rendering.
 -->
 
 ---
 
 ### Sound Effect Segments (`segments`)
 
-<!--
-Optional timed subdivisions of a longer SoundEffect block.
+A `SoundEffect` block may contain one or more timed segments representing changes within a longer sound effect event.
 
-Potential use cases:
-- footsteps begin slowly, then accelerate
-- alarm starts quietly and becomes louder
-- engine starts, idles, then revs
-- a sequence of related impacts or mechanical sounds
+Segments allow a continuous or related sequence of sounds to be represented as a single block while preserving changes in their characteristics, actions, spatial properties or descriptions over time.
 
-TODO:
-- Decide which block-level properties can be overridden at segment level.
-- Follow Music's inheritance model where appropriate.
-- Determine whether descriptionUnits can occur at segment level.
+For example, segments may represent:
+
+- Footsteps beginning slowly and gradually accelerating.
+- An alarm starting quietly and becoming louder.
+- An engine starting, idling and then revving.
+- A sequence of related impacts or mechanical sounds.
+- A sound moving through the scene or becoming associated with a visible source.
+
+#### Sound Effect Segment Object
+
+Each `SoundEffectSegment` specifies a time interval within the parent block and may provide properties that override the corresponding block-level values.
+
+| Property           | Type                     | Description                                                                                      |
+| ------------------ | ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `timeStart`        | `String`                 | Start time of the segment, using the same timestamp format as other blocks.                      |
+| `timeStop`         | `String`                 | End time of the segment, using the same timestamp format as other blocks.                        |
+| `source`           | `Object`                 | Optional override of the sound's spatial or diegetic properties.                                 |
+| `importance`       | `Integer`                | Optional override of the sound's importance (1–5).                                               |
+| `function`         | `Array<String>`          | Optional override of the functions served by the sound.                                          |
+| `sonicDescription` | `Object`                 | Optional override of the sound's perceptual characteristics.                                     |
+| `displayText`      | `String`                 | Optional authored description specific to the segment.                                           |
+| `descriptionUnits` | `Array<DescriptionUnit>` | Optional structured descriptions of the sounds, sources or actions occurring within the segment. |
+
+#### Inheritance and Overrides
+
+Segments follow the same inheritance model as Music.
+
+Properties defined at block level apply throughout the event unless overridden by a segment. When a segment provides a nested object, only the explicitly supplied properties override the corresponding block-level properties. Other properties continue to inherit from the parent block.
+
+For example, a block may describe an engine as `QUIET`, while a later segment overrides its loudness to `LOUD` as the engine revs.
+
+This allows changes to be represented without repeating information that remains consistent throughout the event.
+
+#### Example
+
+The following example represents an engine starting, idling and then revving.
+
+```json
+{
+  "timeStart": "00:01:10.000",
+  "timeStop": "00:01:18.000",
+  "displayText": "An engine starts, idles, then revs loudly",
+  "source": {
+    "isDiegetic": true,
+    "visualPresence": "CLEARLY_IN_SHOT",
+    "location": "A car parked in the foreground"
+  },
+  "sonicDescription": {
+    "loudness": "MEDIUM",
+    "description": "Low mechanical rumbling"
+  },
+  "segments": [
+    {
+      "timeStart": "00:01:10.000",
+      "timeStop": "00:01:12.000",
+      "displayText": "The engine starts",
+      "descriptionUnits": [
+        {
+          "anchor": {
+            "type": "object",
+            "value": "engine"
+          },
+          "descriptors": [
+            {
+              "type": "action",
+              "value": "starts"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timeStart": "00:01:12.000",
+      "timeStop": "00:01:15.000",
+      "displayText": "The engine idles",
+      "descriptionUnits": [
+        {
+          "anchor": {
+            "type": "object",
+            "value": "engine"
+          },
+          "descriptors": [
+            {
+              "type": "action",
+              "value": "idles"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timeStart": "00:01:15.000",
+      "timeStop": "00:01:18.000",
+      "displayText": "The engine revs loudly",
+      "sonicDescription": {
+        "loudness": "LOUD"
+      },
+      "descriptionUnits": [
+        {
+          "anchor": {
+            "type": "object",
+            "value": "engine"
+          },
+          "descriptors": [
+            {
+              "type": "action",
+              "value": "revs"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+The parent block identifies the overall sound event and provides properties shared across its duration.
+
+Each segment describes a distinct phase of the event. The final segment overrides the block-level loudness while inheriting the remaining properties.
+
+<!-- TODO:
+- INHERITANCE:
+  Confirm that SoundEffect segments should follow Music's
+  inheritance and nested-property override model.
+
+- OVERRIDABLE PROPERTIES:
+  Review which block-level properties should be overridable
+  at segment level, including source, importance, function,
+  sonicDescription, displayText and descriptionUnits.
+
+- DESCRIPTION UNITS:
+  Confirm whether segment-level descriptionUnits replace the
+  block-level array or whether individual units can be
+  inherited, modified or supplemented.
+
+- SOUND DEVELOPMENT:
+  Segments are intended to represent the development of
+  a sound over time, including changes in action, intensity,
+  quality, repetition and spatial characteristics.
+
+  Consider whether gradual transitions require additional
+  properties or whether successive segments are sufficient.
+
+- SPATIAL CHANGES:
+  Confirm how changes in source.direction, source.movement
+  and source.visualPresence should be represented across
+  segments.
+
+  A potential future example is Tinker Bell's magical chimes
+  beginning off-screen, moving through the scene and becoming
+  associated with a visible source.
+
+- TIMING:
+  Confirm whether segments may overlap, whether gaps are
+  permitted and how simultaneous changes should be handled.
+
+- BLOCK BOUNDARIES:
+  Clarify when a developing sound should remain one
+  SoundEffect block with multiple segments versus when
+  separate SoundEffect blocks are more appropriate.
+
+- METADATA:
+  Consider whether soundMetadata should remain exclusively
+  at block level or whether metadata changes are meaningful
+  at segment level.
 -->
 
 ---
 
 ### Full Example
 
-<!--
-TODO:
-Create one example that exercises most of the SoundEffect structure.
+The following fictional example demonstrates a `SoundEffect` block representing an initially unidentified mechanical sound that gradually becomes recognisable as an approaching helicopter. The helicopter moves into the foreground, where a mounted Gatling gun begins spinning up before the helicopter accelerates towards the viewer and opens fire.
 
-Ideally choose something richer than a single isolated sound so the example
-can demonstrate:
-- timing
-- source / spatial information
-- importance
-- metadata if appropriate
-- function
-- sonic description
-- description units
-- authored displayText
-- segments
+The example demonstrates how a sound effect can develop over time, both acoustically and narratively. It also illustrates how structured captions can preserve the gradual identification of a sound source rather than revealing its identity immediately.
 
-Possible example: a recognisable sound followed by an action/sequence,
-or a sound moving through the scene.
+The example includes:
+
+- Block-level timing, importance and function.
+- Changes in the identification and visual prominence of a sound source.
+- Spatial movement and changing audible characteristics.
+- Sound-centred and source-centred descriptions.
+- Multiple related sounds, including continuous rotor noise and a new mechanical sound.
+- Authored natural-language descriptions.
+- Timed segments with property inheritance and overrides.
+
+#### Example
+
+#### Full Example
+
+The following example describes a sound that develops from a faint mechanical whirring into a recognisable helicopter rotor, accompanied by an increasingly high-pitched mechanical whine and rapid bursts of gunfire.
+
+```json
+{
+  "type": "SoundEffect",
+  "timeStart": 0,
+  "timeStop": 25,
+  "source": {
+    "isDiegetic": true,
+    "visualPresence": "NOT_IN_SHOT"
+  },
+  "importance": 4,
+  "function": ["SET_MOOD_TONE", "CONVEY_PRESENCE_ABSENCE_PLACE_TIME"],
+  "sonicDescription": {
+    "description": "A mechanical sound develops into a loud, rhythmic rotor noise, joined by a rising metallic whine and rapid explosive bursts.",
+    "loudness": "LOUD",
+    "frequency": {
+      "dominantRange": "LOW"
+    }
+  },
+  "segments": [
+    {
+      "timeStart": 0,
+      "timeStop": 4,
+      "importance": 2,
+      "function": ["SET_MOOD_TONE"],
+      "sonicDescription": {
+        "description": "A faint, low mechanical whirring with an uneven, pulsing rhythm.",
+        "loudness": "QUIET"
+      },
+      "displayText": "A faint mechanical whirring.",
+      "descriptionUnits": [
+        {
+          "anchor": {
+            "type": "SOUND",
+            "value": "mechanical whirring"
+          },
+          "descriptors": [
+            {
+              "type": "LOUDNESS",
+              "value": "faint"
+            },
+            {
+              "type": "RHYTHM",
+              "value": "unevenly pulsing"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timeStart": 4,
+      "timeStop": 8,
+      "importance": 3,
+      "function": ["CONVEY_PRESENCE_ABSENCE_PLACE_TIME"],
+      "sonicDescription": {
+        "description": "The whirring grows louder and develops a distinct, rhythmic chopping quality.",
+        "loudness": "MEDIUM"
+      },
+      "displayText": "The whirring grows into a rhythmic chopping sound.",
+      "descriptionUnits": [
+        {
+          "anchor": {
+            "type": "SOUND",
+            "value": "mechanical whirring"
+          },
+          "descriptors": [
+            {
+              "type": "RHYTHM",
+              "value": "rhythmic chopping"
+            },
+            {
+              "type": "LOUDNESS",
+              "value": "growing louder"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timeStart": 8,
+      "timeStop": 12,
+      "source": {
+        "location": "Helicopter",
+        "direction": "ABOVE"
+      },
+      "importance": 4,
+      "function": ["CONVEY_PRESENCE_ABSENCE_PLACE_TIME", "CONVEY_ACTION_EVENT"],
+      "sonicDescription": {
+        "description": "Loud helicopter rotors produce a deep, repetitive chopping sound.",
+        "loudness": "LOUD"
+      },
+      "displayText": "Helicopter rotors thrum loudly overhead.",
+      "descriptionUnits": [
+        {
+          "anchor": {
+            "type": "SOURCE",
+            "value": "helicopter rotors"
+          },
+          "descriptors": [
+            {
+              "type": "SOUND",
+              "value": "deep, repetitive chopping"
+            },
+            {
+              "type": "LOUDNESS",
+              "value": "loud"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timeStart": 12,
+      "timeStop": 16,
+      "importance": 4,
+      "function": ["SET_MOOD_TONE", "REVEAL_NARRATIVE_INFORMATION"],
+      "sonicDescription": {
+        "description": "A rapid metallic whirring emerges beneath the rotor noise, rising steadily in pitch.",
+        "loudness": "MEDIUM",
+        "frequency": {
+          "dominantRange": "HIGH"
+        }
+      },
+      "displayText": "A metallic whine rises beneath the rotor noise.",
+      "descriptionUnits": [
+        {
+          "anchor": {
+            "type": "SOUND",
+            "value": "metallic whirring"
+          },
+          "descriptors": [
+            {
+              "type": "PITCH",
+              "value": "steadily rising"
+            },
+            {
+              "type": "TIMBRE",
+              "value": "metallic"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timeStart": 16,
+      "timeStop": 20,
+      "importance": 5,
+      "function": ["SET_MOOD_TONE", "REVEAL_NARRATIVE_INFORMATION"],
+      "sonicDescription": {
+        "description": "The metallic whine becomes faster and sharper, layered over the continuous rotor thrum.",
+        "loudness": "LOUD",
+        "frequency": {
+          "dominantRange": "HIGH"
+        }
+      },
+      "displayText": "The metallic whine intensifies over the thundering rotors.",
+      "descriptionUnits": [
+        {
+          "anchor": {
+            "type": "SOUND",
+            "value": "metallic whine"
+          },
+          "descriptors": [
+            {
+              "type": "PITCH",
+              "value": "high and rising"
+            },
+            {
+              "type": "INTENSITY",
+              "value": "increasing"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "timeStart": 20,
+      "timeStop": 25,
+      "importance": 5,
+      "function": ["CONVEY_ACTION_EVENT"],
+      "sonicDescription": {
+        "description": "A rapid succession of sharp, explosive cracks erupts over the continuous mechanical roar.",
+        "loudness": "LOUD"
+      },
+      "displayText": "Rapid gunfire rattles over the roaring rotors.",
+      "descriptionUnits": [
+        {
+          "anchor": {
+            "type": "SOURCE",
+            "value": "gunfire"
+          },
+          "descriptors": [
+            {
+              "type": "SOUND",
+              "value": "sharp explosive cracks"
+            },
+            {
+              "type": "RHYTHM",
+              "value": "rapid succession"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### Interpretation
+
+The example demonstrates the progression of an auditory event through six phases:
+
+1. **Unidentified sound:** A faint, low mechanical whirring is audible. The caption describes its characteristics without prematurely identifying the source.
+2. **Developing sound:** The whirring grows louder and develops a more distinct, rhythmic chopping quality.
+3. **Source identification:** The sound becomes recognisable as helicopter rotors, producing a loud, repetitive thrum.
+4. **Additional sound:** A rapid metallic whirring emerges beneath the continuing rotor noise, gradually increasing in pitch.
+5. **Increasing intensity:** The metallic whine becomes faster and sharper, layered over the continuous rotor sound.
+6. **Gunfire:** Rapid, explosive cracks become audible alongside the continuing mechanical roar.
+
+The parent `SoundEffect` block represents the overall event, while individual segments describe how its audible characteristics, source identification, spatial properties, importance and narrative function develop over time.
+
+The example demonstrates both **sound-centred** descriptions, such as the unidentified mechanical whirring and metallic whine, and **source-centred** descriptions, such as helicopter rotors and gunfire.
+
+The `function` property distinguishes between sounds that establish mood or presence, reveal narrative information, and communicate actions or events. These functions may change as the sound develops.
+
+Segment-level values override corresponding block-level properties. For nested objects, only explicitly supplied properties are overridden, while other values continue to be inherited.
+
+The example deliberately omits `soundMetadata`, as it describes generic helicopter and weapon sounds rather than a particular recording or recognisable sound associated with a specific work. However, if the example instead featured the distinctive sound of a TIE fighter from _Star Wars_, `soundMetadata` could identify the sound and its fictional origin. This would help distinguish a culturally recognisable sound effect from a generic description of an engine or spacecraft, while `sonicDescription` would continue to describe its audible characteristics.
+
+<!-- TODO:
+- PROGRESSIVE IDENTIFICATION:
+  The example begins with an unidentified sound that later
+  becomes recognisable as a helicopter.
+
+  Consider how to represent progressive identification without
+  requiring the source to be named at block level, potentially
+  revealing information before the intended narrative moment.
+
+  The current example uses segment-level descriptionUnits and
+  authored displayText to preserve this progression.
+
+  Clarify whether segment-level displayText should take precedence
+  over block-level displayText during the segment's time interval,
+  ensuring that renderers do not reveal information prematurely.
+
+- CHANGING IMPORTANCE:
+  The example uses segment-level importance values to represent
+  the increasing narrative significance of the sound.
+
+  Confirm whether this is the intended interpretation of
+  importance and how segment-level values interact with the
+  block-level value.
+
+- SPATIAL MOVEMENT:
+  Review whether direction, movement and location adequately
+  represent a helicopter approaching from a distance, moving
+  overhead and accelerating towards the viewer.
+
+  Consider whether distance, approach and recession require
+  additional structured spatial properties.
+
+- MULTIPLE SOUNDS FROM A SHARED SOURCE:
+  The helicopter produces continuous rotor noise while a mounted
+  Gatling gun introduces a separate mechanical sound.
+
+  Consider how to associate multiple sound-producing components
+  with a shared parent source.
+
+- SIMULTANEOUS SOUND DEVELOPMENT:
+  The rotor noise continues while the Gatling gun spins up and
+  fires. The example currently represents these overlapping
+  sounds through combined segment descriptions.
+
+  Determine whether this approach is sufficient or whether
+  independently developing sounds require separate SoundEffect
+  blocks or explicit relationships.
+
+- SOUND-CENTRED AND SOURCE-CENTRED DESCRIPTIONS:
+  Consider how alternative descriptions of the same underlying
+  sound can be explicitly associated, allowing renderers to
+  distinguish different perspectives from separate audible events.
+
+- DESCRIPTION UNIT INHERITANCE:
+  The example assumes that segment-level descriptionUnits replace
+  the block-level array for the corresponding time interval.
+
+  Confirm whether replacement, extension or individual unit
+  overrides are appropriate.
+
+- FREQUENCY:
+  The example avoids assigning a single dominant frequency to
+  segments containing several overlapping sounds with different
+  frequency characteristics.
+
+  Consider whether frequency should be associated with individual
+  description units or independent sound events in such cases.
+
+- BLOCK BOUNDARIES:
+  Consider whether the entire sequence should remain one
+  SoundEffect block or whether the helicopter and weapon should
+  be represented as separate, related SoundEffect blocks.
+
+- METADATA:
+  Consider adding a separate example demonstrating soundMetadata
+  for an identifiable recording or culturally recognisable sound.
 -->
 
 ## Misc
