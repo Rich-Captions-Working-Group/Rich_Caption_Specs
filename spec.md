@@ -622,6 +622,127 @@ Properties omitted from a segment inherit their values from the parent Music blo
 
 ## Misc
 
+*Inherits from:* [`Block`](#block)
+
+The `Misc` class represents caption information that is not directly present in the audio. Most often this is non-speech visual information, such as a translation of a sign written in another language, a correction of something stated on screen, or a news headline. Misc blocks may also carry information that a captioner or researcher chooses to add for a particular audience, such as descriptions of important visual events for viewers with low vision.
+
+Misc is intentionally open. It gives captioners and researchers a place to experiment with new kinds of caption content without requiring a new class for every idea. If a kind of Misc content becomes common and well defined, it may later be promoted to its own class.
+
+### Block-Level Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `importance` | `Integer` | A 1–5 scale indicating the subjective priority of captioning this information (1 = Niche/Extremely low, 5 = Crucial). |
+| `informationType` | `String` | The context or purpose of the text, such as a translation or a caption credit. |
+| `textContent` | `Object` | The text of the Misc block in its original language, along with any translations. |
+
+::: issue Issue Notice
+  I added `importance` to match `Speech` and `Music`, but I am not sure it means the same thing here. Some Misc content (e.g., `ATTRIBUTION` or `ADVERT`) is not really "captioning an event," so a 1–5 priority may be less meaningful. Should we keep it, define it differently for Misc, or drop it? —Saad
+:::
+
+---
+
+### Information Type (`informationType`)
+
+`informationType` describes why the Misc block exists. It is distinct from `importance`: a type describes the role of the information, whereas `importance` concerns the priority of captioning it.
+
+The field is purposely open for experimentation. Captioners and researchers may define their own values (e.g., `COGNITIVE_ACCESS_LOW`, a value a researcher might add for a study on simplified captions).
+
+Suggested values are:
+
+- `DIRECTORIAL_ASIDE`
+- `CORRECTION`
+- `TRANSLATION`
+- `ON_SCREEN_TEXT`
+- `EXTRA_CONTEXT`
+- `IMPLIED_MEANING`
+- `LOW_VISION_ACCESS`
+- `ATTRIBUTION`
+- `ADVERT`
+
+Further values may be added as the specification develops.
+
+#### Example
+
+```json
+"informationType": "CORRECTION"
+```
+
+::: issue Issue Notice
+  Should `informationType` allow more than one value? Some blocks fit several types. For example, a translated news headline is both `TRANSLATION` and `ON_SCREEN_TEXT`. One option is to make it an `Array<String>`, like `function` in `Music`. —Saad
+:::
+
+---
+
+### Text Content Object (`textContent`)
+
+`textContent` contains the text displayed by the Misc block. It follows the same structure as the `lexicalContent` object in `Speech`.
+
+| Property | Type | Description |
+|---|---|---|
+| `original` | `Object` | The text in its primary language, keyed by ISO language code. |
+| `translations` | `Object` | Optional translations, keyed by ISO language code. |
+
+#### Example
+
+```json
+"textContent": {
+  "original": {
+    "en": "Actually the 400 series"
+  },
+  "translations": {
+    "es": "En realidad, la serie 400"
+  }
+}
+```
+
+---
+
+### Example Representation
+
+```json
+{
+  "type": "Misc",
+  "timeStart": "00:03:05.000",
+  "timeStop": "00:03:08.000",
+
+  "importance": 3,
+
+  "informationType": "TRANSLATION",
+
+  "textContent": {
+    "original": {
+      "en": "The White Rabbit"
+    },
+    "translations": {
+      "pt-BR": "O Coelho Branco"
+    }
+  },
+
+  "positionNoGos": [
+    {
+      "xMin": 30.0,
+      "xMax": 70.0,
+      "yMin": 10.0,
+      "yMax": 25.0
+    }
+  ],
+
+  "notes": "Translates the German pub sign 'Das Weiße Kaninchen' shown above the door.",
+
+  "tags": [
+    "#signage"
+  ],
+
+  "metadata": {
+    "blockId": "550e8400-e29b-41d4-a716-446655440002",
+    "author": "JaneDoe_Editor",
+    "createdAt": "2026-10-10T14:00:00Z",
+    "updatedAt": "2026-10-10T14:05:00Z"
+  }
+}
+```
+
 
 # Design Principles
 
