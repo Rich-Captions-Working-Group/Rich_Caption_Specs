@@ -77,16 +77,45 @@ The `Header` is a global configuration object that sits at the beginning of ever
 
 | Property             | Type     | Description                                                                                                                       |
 | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `speakers`           | `Object` | A dictionary mapping unique `speakerId` integers to their default `speaker` objects (names and descriptions).                     |
-| `supportedLanguages` | `Object` | Key-value pairs of ISO language codes used in the file to their human-readable names (e.g., `{"pt-BR": "Brazilian Portuguese"}`). |
+| `speakers`           | `Object` | A dictionary mapping unique `speakerID` integers to their default `speaker` object values (names and descriptions). These default values will be used if a `speakerID` is used but no other details are given.                     |
+| `supportedLanguages` | `Object` | Key-value pairs of ISO 639-1 language codes used in the file to their human-readable names (e.g., `{"pt-BR": "Brazilian Portuguese"}`). |
 
 ---
+
+### Example Representation
+
+```json
+{
+  "type": "Header",
+  "speakers": [
+    {
+      "speaker": {
+        "speakerID": 104,
+        "narrativeName": "John",
+        "descriptiveName": "Man in Suit",
+        "spoilerName": "Dad"
+      },
+      "speaker": {
+        "speakerID": 107,
+        "narrativeName": "Sarah",
+        "descriptiveName": "Dcotor",
+        "spoilerName": "Sister"
+      }
+    }
+  ],
+  "supportedLanguages": {
+    "en": "English",
+    "pt-BR": "Brazilian Portuguese",
+    "es": "Spanish"
+  }
+}
+```
 
 ## Speech
 
 _Inherits from:_ [`Block`](#block)
 
-The `Speech` class represents ways of communicating that have well-established lexical meaning. This includes spoken languages, signed languages, and fictitious/constructed languages.
+The `Speech` class represents ways of communicating that have well-established lexical meaning. This includes spoken languages, signed languages, and fictitious/constructed languages. `Speech` opperates at a Block-level, which represents a single chunk or unit of speech/signing to be communicated, and a Segement-level, in which particular words or phrases in the Speech Block can be given distinct customization parameters. 
 
 ### Block-Level Properties
 
@@ -96,39 +125,41 @@ These properties apply to the entire speech event.
 | ---------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `speaker`        | `Object`         | Identifying information about the entity communicating.                                                                  |
 | `source`         | `Object`         | Spatial and diegetic information about where the communication originates.                                               |
-| `lexicalContent` | `Object`         | The verbatim communication, translations, and text-display flags.                                                        |
-| `importance`     | `Integer`        | A 1-5 scale indicating the subjective priority of captioning this event (1 = Niche/Extremely low, 5 = Crucial).          |
-| `annotations`    | `Object`         | Block-level defaults for manner of speech and sonic properties. These apply to all segments unless overridden.           |
+| `lexicalContent` | `Object`         | The verbatim communication (i.e. what was said or signed) or its translations.                                                        |
+| `importance`     | `Integer`        | A 1-5 scale indicating the subjective priority of captioning this event (1 = Niche/Extremely low priority, 5 = Crucial).          |
+| `annotations`    | `Object`         | Block-level defaults for manner of speech and sonic properties. These apply to all segments unless overridden at the segment level.           |
 | `segments`       | `Array<Segment>` | An ordered list of `Segment` objects breaking the block down into smaller timed units (e.g., words, phrases, syllables). |
 
 ---
 
-### Component Objects
+### Speech Event Objects
 
 #### Speaker Object (`speaker`)
 
+Default `speaker` properties are defined in the `Header`. If there are any differences between the `Header` speaker object and the `speech`-level speaker object, the `speech`-level object will take priority. 
+
 | Property          | Type      | Description                                                                                                                             |
 | ----------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `speakerId`       | `Integer` | A unique integer value used to identify a speaker the project. This ID could be shared across videos (e.g., across episodes of a show). |
-| `narrativeName`   | `String`  | The character's actual name (e.g., `"Sarah"`, `"Prof. X"`).                                                                             |
-| `descriptiveName` | `String`  | A physical or contextual description (e.g., `"Man in red hat"`).                                                                        |
-| `spoilerName`     | `String`  | The name to be displayed if character identity `"spoilers"` are desired.                                                                |
+| `speakerID`       | `Integer` | A unique integer value used to identify a speaker in the project. This ID could be shared across videos (e.g., across episodes of a show). |
+| `narrativeName`   | `String`  | The name the character is known by in the narrative (e.g., `"Sarah"`, `"Prof. X"`). NOTE: Some characters speak before their names are revealed. In this case, it is recommended to input a null value of `""` in the narrativeName until the audience knows their name.  |
+| `descriptiveName` | `String`  | A physical or contextual description (e.g., `"Man in red hat"`). NOTE: Some contextual descriptors like `"Mom"` or `"CEO"` should only be used if this description is already clearly established.|
+| `spoilerName`     | `String`  | The name to be displayed if character identity `"spoilers"` are desired. For example, if a character's identity is masked or hidden, say as `Superhero X`, but later revelaed to be a named character, say `Jane Doe`, then the `spoilerName` for both `Superhero X` and `Jane Doe` would be `Jane Doe`. |
 
 #### Source Object (`source`)
 
 | Property         | Type      | Description                                                                                                                           |
 | ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `isDiegetic`     | `Boolean` | `true` if the source exists within the world of the video (e.g., a radio playing in a scene); `false` if external (e.g., a narrator). |
-| `visualPresence` | `Enum`    | Options: `"FOCUS"`, `"CLEARLY_IN_SHOT"`, `"SOMEWHAT_IN_SHOT"`, `"NOT_IN_SHOT"`.                                                       |
-| `location`       | `String`  | Descriptive location of the source (e.g., `"Behind the door"`, `"Over the PA system"`).                                               |
+| `isDiegetic`     | `Boolean` | Where the communication originates from. `true` if the source exists within the world of the video (e.g., a radio playing in a scene); `false` if external (e.g., a narrator). |
+| `visualPresence` | `Enum`    | How clearly visible the person communicating can be seen in the video. Options: `"FOCUS"`, `"CLEARLY_IN_FRAME"`, `"SOMEWHAT_IN_FRAME"` (particially obscured or only briefly in the shot), `"NOT_IN_FRAME"`.                                                       |
+| `location`       | `String`  | Descriptive location of the source (e.g., `"Behind the door"`, `"Over the PA system"`). |
 
 #### Lexical Content Object (`lexicalContent`)
 
 | Property       | Type      | Description                                                                                                               |
 | -------------- | --------- | ------------------------------------------------------------------------------------------------------------------------- |
 | `original`     | `Object`  | The verbatim communication in its primary language, keyed by ISO code (e.g., `{"es": "..."}`).                            |
-| `translations` | `Object`  | Key-value pairs of ISO language codes to translated strings (e.g., `{"en": "...", "es": "...", "en-simplified": "..."}`). |
-| `isBurnedIn`   | `Boolean` | `true` if this specific block is already burned into the source video file as open captions.                              |
+| `translations` | `Object`  | Key-value pairs of ISO language codes to translated strings (e.g., `{"en": "...", "pt": "...", "en-simplified": "..."}`). |
+| `isBurnedIn`   | `Boolean` | `true` if this specific block is already burned into the source video file as open captions; `false` otherwise |
 
 #### Annotations Object (`annotations`)
 
@@ -142,7 +173,7 @@ _Note: This object can exist at both the Block level (as a default) and the Segm
 | `accentSpecific`   | `String` | Description of a highly specific accent, such as a region within a nation (e.g., `"Thick Texan accent"`).                                           |
 | `impersonation`    | `String` | Descriptive string if the speaker is mimicking another entity (e.g., `"As Dolly Parton"`).                                                          |
 | `sonicDescription` | `String` | Environmental effects altering the sound (e.g., `"Muffled"`, `"Distorted"`).                                                                        |
-| `vocalEffort`      | `Enum`   | Options: `"WHISPER"`, `"NORMAL"`, `"SHOUT"`.                                                                                                        |
+| `vocalDelivery`      | `Enum`   | The volume at which speech in particular is delivered. Options: `"WHISPER"`, `"NORMAL"`, `"SHOUT"`.                                                                                                        |
 
 ---
 
@@ -155,13 +186,13 @@ Segments are the lowest configurable units within a `Speech` block. Timing is op
 | `content`     | `String` | The specific unit of communication (e.g., a word, syllable, or punctuation mark).     |
 | `timeStart`   | `String` | The start timestamp of this specific segment.                                         |
 | `timeStop`    | `String` | The end timestamp of this specific segment.                                           |
-| `annotations` | `Object` | Segment-specific overrides, such as language shifts (code-switching) or vocal effort. |
+| `annotations` | `Object` | Segment-specific overrides, such as language shifts or vocal effort. |
 
 ---
 
 ### Example Representation
 
-This example demonstrates a primarily English sentence with a Spanish phrase embedded within it, utilizing segment-level language overrides.
+This example demonstrates a primarily English sentence with a Spanish phrase embedded within it, utilizing segment-level language overrides to communicate that the phrase "chico genial" is a Spanish phrase in an English sentence.
 
 ```json
 {
@@ -170,7 +201,7 @@ This example demonstrates a primarily English sentence with a Spanish phrase emb
   "timeStop": "00:01:12.500",
   "importance": 4,
   "speaker": {
-    "speakerId": 104,
+    "speakerID": 104,
     "narrativeName": "John",
     "descriptiveName": "Man in Suit",
     "spoilerName": "Dad"
@@ -332,9 +363,12 @@ The representation of frequency characteristics remains provisional. This is int
 | --------------- | ------ | ----------------------------------------------------------------- |
 | `dominantRange` | `Enum` | Predominant frequency range. Options: `"LOW"`, `"MID"`, `"HIGH"`. |
 
+
+<!-- 
 ::: issue Issue Notice
 I had a reference to an additional "ML profile" with low, medium, and high values. I don't have a note describing what this is, and, er, I forgot. —Caluã
 :::
+-->
 
 ---
 
@@ -924,9 +958,9 @@ Captioners may use either approach or combine both within the same sound effect 
 
 For example, the same event might be described as:
 
-- **Sound-centred:** "Heavy footsteps approach."
-- **Source-centred:** "A person walks heavily towards the door."
-- **Combined:** "A person approaches, their heavy footsteps echoing."
+- **Sound-centred:** "Click"
+- **Source-centred:** "Camera turns off"
+- **Combined:** "Camera turns off with a soft click"
 
 Neither approach is considered inherently preferable. The appropriate level and focus of description depend on the audiovisual context and the information available to the captioner.
 
@@ -1606,14 +1640,17 @@ Misc is intentionally open. It gives captioners and researchers a place to exper
 
 | Property | Type | Description |
 |---|---|---|
+<!--
 | `importance` | `Integer` | A 1–5 scale indicating the subjective priority of captioning this information (1 = Niche/Extremely low, 5 = Crucial). |
+-->
 | `informationType` | `String` | The context or purpose of the text, such as a translation or a caption credit. |
 | `textContent` | `Object` | The text of the Misc block in its original language, along with any translations. |
 
+<!--
 ::: issue Issue Notice
   I added `importance` to match `Speech` and `Music`, but I am not sure it means the same thing here. Some Misc content (e.g., `ATTRIBUTION` or `ADVERT`) is not really "captioning an event," so a 1–5 priority may be less meaningful. Should we keep it, define it differently for Misc, or drop it? —Saad
 :::
-
+-->
 ---
 
 ### Information Type (`informationType`)
